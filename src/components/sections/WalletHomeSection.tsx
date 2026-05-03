@@ -1,52 +1,16 @@
+import { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import StatCard from "@/components/ui/StatCard";
+import TransactionRow from "@/components/ui/TransactionRow";
 import Link from "next/link";
 import { UserMenu } from "@/components/UserMenu";
-
-const recentTransfers = [
-  {
-    avatarSrc: "/figmaAssets/background-border-6.svg",
-    name: "Kouassi Georges 🇫🇷",
-    meta: "Aujourd'hui · 09:40 · €200",
-    amount: "+131 284",
-    amountClassName: "text-tradewind",
-    status: "Reçu",
-    statusClassName: "bg-aztec text-tradewind border-[#6ec4a74c]",
-  },
-  {
-    avatarSrc: "/figmaAssets/background-border-1.svg",
-    name: "Kouassi Georges 🇫🇷",
-    meta: "8 Avr · 08:12 · €250",
-    amount: "+163 989",
-    amountClassName: "text-pampas",
-    status: "Retiré",
-    statusClassName: "bg-racing-green text-shamrock border-[#4ade8040]",
-  },
-  {
-    avatarSrc: "/figmaAssets/background-border-9.svg",
-    name: "Kouassi Georges 🇫🇷",
-    meta: "2 Avr · 11:46 · €150",
-    amount: "+98 394",
-    amountClassName: "text-bronco",
-    status: "Retiré",
-    statusClassName: "bg-racing-green text-shamrock border-[#4ade8040]",
-  },
-  {
-    avatarSrc: "/figmaAssets/background-border-4.svg",
-    name: "Aminata Diallo 🇨🇮",
-    meta: "28 Mar · 16:20 · €80",
-    amount: "+52 476",
-    amountClassName: "text-flint",
-    status: "En attente",
-    statusClassName: "bg-[#1f1900] text-[#c4a35a] border-[#fbbf2440]",
-  },
-];
+import { useTransaction } from "@/contexts/TransactionContext";
 
 const navItems = [
-  { label: "Mon Wallet", href: "/wallet", active: true, underlined: true },
-  { label: "Retrait", href: "/retrait", active: false, underlined: false },
-  { label: "Historique", href: "/historique", active: false, underlined: true },
+  { label: "Accueil", href: "/wallet", active: true },
+  { label: "Historique", href: "/historique", active: false },
 ];
 
 const footerLinks = [
@@ -56,10 +20,15 @@ const footerLinks = [
 ];
 
 export const WalletHomeSection = (): JSX.Element => {
+  const { walletBalance, transfers, monthlyReceived } = useTransaction();
+
+  const euroBalance = (walletBalance / 655).toFixed(2);
+  const lastTransfers = useMemo(() => transfers.slice(-3).reverse(), [transfers]);
+
   return (
-    <section className="relative w-full overflow-hidden rounded-sm border border-[#0000001a] bg-white">
-      <div className="min-h-[953px] w-full border border-black bg-[linear-gradient(180deg,rgba(9,20,18,1)_0%,rgba(10,21,16,1)_100%)]">
-        <header className="sticky top-0 z-10 flex min-h-16 w-full items-center justify-center border-b border-[#1f1f1f] bg-cod-gray-88 backdrop-blur backdrop-brightness-[100%] [-webkit-backdrop-filter:blur(8px)_brightness(100%)]">
+    <section className="relative w-full overflow-hidden bg-cod-gray-88 min-h-screen">
+      <div className="bg-cod-gray-88 min-h-screen">
+        <header className="sticky top-0 z-10 flex min-h-16 w-full items-center justify-center border-b border-[#1f1f1f] bg-cod-gray-88 backdrop-blur [-webkit-backdrop-filter:blur(8px)_brightness(100%)]">
           <div className="flex w-full max-w-[1160px] items-center justify-between gap-6 px-6 py-3 xl:px-10">
             <div className="flex min-w-0 flex-1 items-center gap-2.5">
               <Link href="/" className="inline-flex items-center gap-2.5">
@@ -68,7 +37,7 @@ export const WalletHomeSection = (): JSX.Element => {
                   DiasporaConnect
                 </span>
               </Link>
-              <Badge className="rounded-full border border-[#6ec4a74c] bg-aztec px-[7px] py-0.5 [font-family:'DM_Sans',Helvetica] text-[9px] font-bold tracking-[0.90px] text-tradewind hover:bg-aztec">
+              <Badge className="rounded-full border border-[#fbbf2440] bg-[#1f1900] px-[7px] py-0.5 [font-family:'DM_Sans',Helvetica] text-[9px] font-bold tracking-[0.90px] text-[#c4a35a] hover:bg-[#1f1900]">
                 DESTINATAIRE
               </Badge>
             </div>
@@ -81,14 +50,14 @@ export const WalletHomeSection = (): JSX.Element => {
                     item.active ? "bg-aztec text-tradewind" : "text-flint"
                   }`}
                 >
-                  <span className={item.underlined ? "underline" : ""}>{item.label}</span>
+                  {item.label}
                 </Link>
               ))}
             </nav>
             <div className="flex items-center gap-2.5">
               <Button asChild variant="outline" className="h-auto rounded-full border-[#2e2e2e] bg-transparent px-4 py-[7px] hover:bg-transparent">
-                <Link href="/expediteur" className="[font-family:'DM_Sans',Helvetica] text-xs font-medium text-twine">
-                  ← Interface Expéditeur
+                <Link href="/expediteur" className="[font-family:'DM_Sans',Helvetica] text-xs font-medium text-tradewind">
+                  Interface Expéditeur ←
                 </Link>
               </Button>
               <UserMenu />
@@ -96,121 +65,211 @@ export const WalletHomeSection = (): JSX.Element => {
           </div>
         </header>
 
-        <div className="mx-auto flex w-full max-w-[1160px] flex-col gap-5 px-6 pb-20 pt-12 xl:px-10">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div className="flex flex-col gap-1">
-              <h1 className="[font-family:'DM_Sans',Helvetica] text-[28px] font-medium tracking-[-0.56px] leading-[42px] text-pampas">
-                Mon Wallet
-              </h1>
-              <p className="[font-family:'DM_Sans',Helvetica] text-sm font-normal leading-[21px] text-flint">
-                Amadou Mbaye · amadou@diaspora.io
-              </p>
-            </div>
-            <Button asChild className="h-10 rounded-xl bg-tradewind px-[22px] py-0 text-[#0d0d0d] hover:bg-tradewind">
-              <Link href="/retrait" className="inline-flex items-center gap-2">
-                <img className="h-4 w-4" alt="Retrait" src="/figmaAssets/svg-4.svg" />
-                <span className="[font-family:'DM_Sans',Helvetica] text-[13px] font-medium leading-[19.5px] underline">
-                  Retirer le solde
-                </span>
-              </Link>
-            </Button>
+        <div className="mx-auto flex w-full max-w-[1160px] flex-col gap-6 px-6 pb-20 pt-12 xl:px-10">
+          <div className="flex flex-col gap-1">
+            <h1 className="[font-family:'DM_Sans',Helvetica] text-[28px] font-medium tracking-[-0.56px] leading-[42px] text-pampas">
+              Mon portefeuille
+            </h1>
+            <p className="[font-family:'DM_Sans',Helvetica] text-sm font-normal leading-[21px] text-flint">
+              Gérez vos fonds reçus et consultez vos transactions.
+            </p>
           </div>
 
-          <div className="grid gap-4 pt-4 md:grid-cols-3">
-            <Card className="col-span-3 rounded-2xl border border-[#6ec4a726] bg-aztec shadow-none md:col-span-1">
-              <CardContent className="flex h-full flex-col gap-2 px-6 pb-6 pt-6">
-                <div className="[font-family:'DM_Sans',Helvetica] text-[11px] font-bold tracking-[0.80px] text-tradewind-60 uppercase">
-                  Solde disponible
-                </div>
-                <div className="[font-family:'DM_Mono',Helvetica] text-[42px] font-medium leading-[1.1] tracking-[-1px] text-tradewind">
-                  131 284
-                </div>
-                <div className="[font-family:'DM_Mono',Helvetica] text-sm font-normal text-elm">XOF</div>
-                <div className="mt-2 flex flex-col gap-1">
-                  <div className="[font-family:'DM_Sans',Helvetica] text-[11px] text-elm">
-                    ≈ €200.00 · Taux : 655 XOF/€
+          <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
+            <div className="flex flex-col gap-5">
+              <Card className="rounded-2xl border border-[#6ec4a726] bg-aztec shadow-none">
+                <CardContent className="flex flex-col gap-6 px-6 py-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-1">
+                      <span className="[font-family:'DM_Sans',Helvetica] text-sm text-flint">
+                        Solde disponible
+                      </span>
+                      <span className="[font-family:'DM_Mono',Helvetica] text-3xl font-medium text-tradewind">
+                        {walletBalance.toLocaleString("fr-FR")} XOF
+                      </span>
+                      <span className="[font-family:'DM_Sans',Helvetica] text-xs text-flint">
+                        ≈ {euroBalance} €
+                      </span>
+                    </div>
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-tradewind/10">
+                      <span className="text-lg">💰</span>
+                    </div>
                   </div>
-                  <Badge className="w-fit rounded border border-[#6ec4a74c] bg-aztec px-2.5 py-[3px] [font-family:'DM_Sans',Helvetica] text-[10px] font-bold tracking-[0.50px] text-tradewind hover:bg-aztec">
-                    À retirer
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
 
-            <Card className="rounded-2xl border border-[#1f1f1f] bg-[#212121] shadow-none">
-              <CardContent className="flex h-full flex-col gap-[5px] px-[18px] pb-4 pt-[18px]">
-                <div className="[font-family:'DM_Sans',Helvetica] text-[11px] font-normal leading-[16.5px] text-flint">
-                  Reçu ce mois
-                </div>
-                <div className="pt-[3px] [font-family:'DM_Mono',Helvetica] text-[28px] font-medium leading-7 text-pampas">
-                  445 143
-                </div>
-                <div className="[font-family:'DM_Mono',Helvetica] text-[11px] font-normal leading-[16.5px] text-flint">
-                  XOF · 4 transferts
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="flex gap-3">
+                    <Button asChild className="flex-1 rounded-xl bg-tradewind text-[#0d0d0d] hover:bg-tradewind">
+                      <Link href="/retrait" className="[font-family:'DM_Sans',Helvetica] text-sm font-medium">
+                        Retirer
+                      </Link>
+                    </Button>
+                    <Button asChild className="flex-1 rounded-xl border-[#2e2e2e] bg-transparent hover:bg-[#2e2e2e]">
+                      <Link href="/historique" className="[font-family:'DM_Sans',Helvetica] text-sm font-medium text-twine">
+                        Historique
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
 
-            <Card className="rounded-2xl border border-[#1f1f1f] bg-[#212121] shadow-none">
-              <CardContent className="flex h-full flex-col gap-[5px] px-[18px] pb-4 pt-[18px]">
-                <div className="[font-family:'DM_Sans',Helvetica] text-[11px] font-normal leading-[16.5px] text-flint">
-                  Impact total économisé
-                </div>
-                <div className="pt-[3px] [font-family:'DM_Mono',Helvetica] text-[28px] font-medium leading-7 text-tradewind">
-                  68 600
-                </div>
-                <div className="[font-family:'DM_Mono',Helvetica] text-[11px] font-normal leading-[16.5px] text-elm">
-                  XOF économisés vs banques
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <StatCard
+                  label="Reçu ce mois"
+                  value={`${monthlyReceived.toLocaleString("fr-FR")} XOF`}
+                  subtext={`≈ ${(monthlyReceived / 655).toFixed(0)} €`}
+                />
+                <StatCard
+                  label="Transactions"
+                  value={transfers.length.toString()}
+                  subtext="Ce mois"
+                />
+              </div>
 
-          <div className="flex flex-wrap gap-3 pt-2">
-            <Button asChild className="h-10 rounded-xl bg-tradewind px-5 text-[#0d0d0d] hover:bg-tradewind">
-              <Link href="/retrait" className="[font-family:'DM_Sans',Helvetica] text-[13px] font-medium">
-                Retirer les fonds
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="h-10 rounded-xl border-[#2e2e2e] bg-transparent px-5 text-pampas hover:bg-[#1f1f1f]">
-              <Link href="/historique" className="[font-family:'DM_Sans',Helvetica] text-[13px] font-medium">
-                Voir l'historique
-              </Link>
-            </Button>
-          </div>
+              <Card className="rounded-2xl border border-[#6ec4a726] bg-aztec shadow-none">
+                <CardContent className="flex flex-col gap-4 px-6 py-5">
+                  <div className="flex items-center justify-between">
+                    <h3 className="[font-family:'DM_Sans',Helvetica] text-lg font-medium text-pampas">
+                      Dernières transactions
+                    </h3>
+                    <Button asChild variant="ghost" className="h-auto p-0 text-tradewind hover:bg-transparent">
+                      <Link href="/historique" className="[font-family:'DM_Sans',Helvetica] text-sm font-medium">
+                        Voir tout →
+                      </Link>
+                    </Button>
+                  </div>
 
-          <div className="pt-4">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="[font-family:'DM_Sans',Helvetica] text-[13px] font-semibold tracking-[0.80px] text-flint uppercase">
-                Transferts récents
-              </h2>
-              <Link href="/historique" className="[font-family:'DM_Sans',Helvetica] text-[12px] font-normal text-tradewind underline">
-                Tout voir
-              </Link>
+                  {lastTransfers.length > 0 ? (
+                    <div className="flex flex-col gap-3">
+                      {lastTransfers.map((transfer, index) => (
+                        <TransactionRow
+                          key={index}
+                          name={transfer.recipient}
+                          date={transfer.date}
+                          amount={transfer.amountXOF.toString()}
+                          fees="0.00"
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-4 py-8 text-center">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#2e2e2e]">
+                        <span className="text-2xl">📭</span>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="[font-family:'DM_Sans',Helvetica] text-sm font-medium text-pampas">
+                          Aucune transaction
+                        </span>
+                        <span className="[font-family:'DM_Sans',Helvetica] text-xs text-flint">
+                          Vos transactions apparaîtront ici
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
-            <Card className="overflow-hidden rounded-2xl border border-[#2e2e2e] bg-[#1a1a1a] shadow-none">
-              <CardContent className="p-0">
-                <ul className="flex flex-col divide-y divide-[#1f1f1f]">
-                  {recentTransfers.map((t) => (
-                    <li key={`${t.name}-${t.meta}`} className="flex items-center gap-3 px-4 py-3">
-                      <img className="h-[34px] w-[34px] shrink-0" alt={t.name} src={t.avatarSrc} />
-                      <div className="flex min-w-0 flex-1 flex-col">
-                        <span className="[font-family:'DM_Sans',Helvetica] text-[13px] font-medium text-pampas">{t.name}</span>
-                        <span className="[font-family:'DM_Sans',Helvetica] text-[11px] text-flint">{t.meta}</span>
-                      </div>
-                      <div className="flex shrink-0 flex-col items-end gap-1">
-                        <span className={`[font-family:'DM_Mono',Helvetica] text-[13px] font-medium ${t.amountClassName}`}>{t.amount}</span>
-                        <Badge className={`rounded border px-[7px] py-0.5 [font-family:'DM_Sans',Helvetica] text-[10px] font-bold tracking-[0.50px] hover:bg-inherit ${t.statusClassName}`}>
-                          {t.status}
-                        </Badge>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
+
+            <div className="flex flex-col gap-5">
+              <Card className="rounded-2xl border border-[#6ec4a726] bg-aztec shadow-none">
+                <CardContent className="flex flex-col gap-4 px-6 py-5">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-tradewind/10">
+                      <span className="text-sm">🔒</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="[font-family:'DM_Sans',Helvetica] text-sm font-medium text-pampas">
+                        Sécurité garantie
+                      </span>
+                      <span className="[font-family:'DM_Sans',Helvetica] text-xs text-flint">
+                        Chiffrement end-to-end
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-tradewind/10">
+                      <span className="text-sm">⚡</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="[font-family:'DM_Sans',Helvetica] text-sm font-medium text-pampas">
+                        Transferts instantanés
+                      </span>
+                      <span className="[font-family:'DM_Sans',Helvetica] text-xs text-flint">
+                        Réception en 5 minutes
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-tradewind/10">
+                      <span className="text-sm">🌍</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="[font-family:'DM_Sans',Helvetica] text-sm font-medium text-pampas">
+                        Couverture panafricaine
+                      </span>
+                      <span className="[font-family:'DM_Sans',Helvetica] text-xs text-flint">
+                        14 pays desservis
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-2xl border border-[#6ec4a726] bg-aztec shadow-none">
+                <CardContent className="flex flex-col gap-4 px-6 py-5">
+                  <h3 className="[font-family:'DM_Sans',Helvetica] text-lg font-medium text-pampas">
+                    Actions rapides
+                  </h3>
+                  <div className="grid gap-3">
+                    <Button asChild className="h-12 w-full justify-start rounded-xl bg-transparent hover:bg-[#2e2e2e] border border-[#2e2e2e]">
+                      <Link href="/retrait" className="[font-family:'DM_Sans',Helvetica] text-sm font-medium text-twine">
+                        💵 Retirer des fonds
+                      </Link>
+                    </Button>
+                    <Button asChild className="h-12 w-full justify-start rounded-xl bg-transparent hover:bg-[#2e2e2e] border border-[#2e2e2e]">
+                      <Link href="/historique" className="[font-family:'DM_Sans',Helvetica] text-sm font-medium text-twine">
+                        📊 Voir l'historique
+                      </Link>
+                    </Button>
+                    <Button asChild className="h-12 w-full justify-start rounded-xl bg-transparent hover:bg-[#2e2e2e] border border-[#2e2e2e]">
+                      <Link href="/expediteur" className="[font-family:'DM_Sans',Helvetica] text-sm font-medium text-twine">
+                        ✉️ Envoyer de l'argent
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-2xl border border-[#6ec4a726] bg-aztec shadow-none">
+                <CardContent className="flex flex-col gap-[3px] px-5 py-4">
+                  <p className="[font-family:'DM_Sans',Helvetica] text-[10px] font-bold tracking-[0.80px] text-tradewind-60 uppercase">
+                    Économies réalisées
+                  </p>
+                  <p className="[font-family:'DM_Mono',Helvetica] text-[22px] font-medium text-tradewind">68 600 XOF</p>
+                  <p className="[font-family:'DM_Sans',Helvetica] text-[11px] text-elm">économisés ce mois vs services traditionnels</p>
+                  <Badge className="mt-1 w-fit rounded border border-[#6ec4a74c] bg-aztec px-2.5 py-[3px] [font-family:'DM_Sans',Helvetica] text-[10px] font-bold tracking-[0.50px] text-tradewind hover:bg-aztec">
+                    Objectif ODD 10 : &lt; 3% ✓
+                  </Badge>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
+
+        <footer className="w-full border-t border-[#1f1f1f] bg-transparent">
+          <div className="mx-auto flex w-full max-w-[1160px] flex-wrap items-center justify-between gap-6 px-6 py-7 xl:px-10">
+            <div className="inline-flex items-center gap-2">
+              <img className="h-[26px] w-[26px]" alt="DiasporaConnect" src="/figmaAssets/background-border-2.svg" />
+              <span className="[font-family:'DM_Sans',Helvetica] text-sm font-normal leading-[21px] text-flint">DiasporaConnect</span>
+            </div>
+            <nav className="inline-flex items-start gap-5" aria-label="Pied de page">
+              {footerLinks.map((link) => (
+                <Link key={link.label} href={link.href} className="[font-family:'DM_Sans',Helvetica] text-xs font-normal leading-[18px] text-flint">
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+            <div className="h-[18px] w-[120px]" />
+          </div>
+        </footer>
       </div>
     </section>
   );

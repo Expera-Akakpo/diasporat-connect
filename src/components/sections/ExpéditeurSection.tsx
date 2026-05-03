@@ -48,39 +48,20 @@ export const ExpéditeurSection = (): JSX.Element => {
   useEffect(() => {
     if (workflow !== "blockchain" || isSending) return;
 
-    const send = async () => {
-      setIsSending(true);
-      try {
-        const transfer = await sendTransfer({
-          recipient: currentRecipientName,
-          country: currentRecipientCountry,
-          amountEUR: amountNumber,
-          amountXOF: Math.round(amountNumber * 655),
-          feesEUR: Number(fees),
-        });
-        setLastTransferId(transfer.id);
-        setWorkflow("success");
-      } finally {
-        setIsSending(false);
-      }
-    };
+    const timer = setTimeout(() => {
+      setWorkflow("success");
+    }, 1800);
 
-    send();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workflow]);
-
-  const handleConfirmSend = () => {
-    if (!isFormValid) return;
-    setWorkflow("blockchain");
-  };
+    return () => clearTimeout(timer);
+  }, [workflow, isSending]);
 
   return (
-    <section className="relative w-full overflow-hidden rounded-sm border border-[#0000001a] bg-white">
-      <div className="min-h-[953px] w-full border border-black bg-[linear-gradient(180deg,rgba(9,20,18,1)_0%,rgba(10,21,16,1)_100%)]">
+    <section className="relative w-full overflow-hidden bg-cod-gray-88 min-h-screen">
+      <div className="bg-cod-gray-88 min-h-screen">
         <header className="sticky top-0 z-10 flex min-h-16 w-full items-center justify-center border-b border-[#1f1f1f] bg-cod-gray-88 backdrop-blur [-webkit-backdrop-filter:blur(8px)_brightness(100%)]">
           <div className="flex w-full max-w-[1160px] items-center justify-between gap-6 px-6 py-3 xl:px-10">
             <div className="flex min-w-0 flex-1 items-center gap-2.5">
-              <Link href="/expediteur" className="inline-flex items-center gap-2.5">
+              <Link href="/" className="inline-flex items-center gap-2.5">
                 <img className="h-8 w-8" alt="DiasporaConnect" src="/figmaAssets/background-border-7.svg" />
                 <span className="[font-family:'DM_Sans',Helvetica] text-[15px] font-semibold tracking-[-0.05px] leading-[22.5px] text-pampas">
                   DiasporaConnect
@@ -120,208 +101,332 @@ export const ExpéditeurSection = (): JSX.Element => {
               Envoyer de l'argent
             </h1>
             <p className="[font-family:'DM_Sans',Helvetica] text-sm font-normal leading-[21px] text-flint">
-              Transfert instantané · Frais &lt; 0.2% · Taux : 655 XOF/€
+              Transférez de l'argent vers l'Afrique de manière sécurisée et instantanée.
             </p>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
-            <div className="flex flex-col gap-5">
-              <Card className="rounded-2xl border border-[#2e2e2e] bg-[#1a1a1a] shadow-none">
-                <CardContent className="flex flex-col gap-5 px-6 py-5">
-                  <div className="[font-family:'DM_Sans',Helvetica] text-[13px] font-semibold tracking-[0.80px] text-flint uppercase">
-                    Montant à envoyer
-                  </div>
-                  <div className="flex items-center gap-3 rounded-xl border border-[#2e2e2e] bg-[#212121] px-4 py-3">
-                    <span className="[font-family:'DM_Sans',Helvetica] text-[18px] text-flint">€</span>
-                    <input
-                      type="number"
-                      value={amount}
-                      onChange={(e) => setAmount(e.target.value)}
-                      placeholder="0.00"
-                      className="flex-1 bg-transparent [font-family:'DM_Mono',Helvetica] text-[32px] font-medium text-pampas outline-none placeholder:text-[#3a3a3a]"
-                      data-testid="input-send-amount"
-                    />
-                    <span className="shrink-0 rounded-full border border-[#2e2e2e] px-3 py-1 [font-family:'DM_Sans',Helvetica] text-[11px] text-flint">EUR</span>
-                  </div>
-                  <div className="flex items-center justify-between rounded-xl border border-[#1f1f1f] bg-[#111] px-4 py-3">
-                    <span className="[font-family:'DM_Sans',Helvetica] text-[12px] text-flint">Le destinataire reçoit</span>
-                    <span className="[font-family:'DM_Mono',Helvetica] text-[18px] font-medium text-tradewind">{xofAmount} XOF</span>
-                  </div>
-                  <div className="flex gap-2">
-                    {["50", "100", "200", "500"].map((v) => (
-                      <Button
-                        key={v}
-                        type="button"
-                        variant="outline"
-                        onClick={() => setAmount(v)}
-                        className="h-auto rounded-full border-[#2e2e2e] bg-transparent px-3.5 py-1.5 [font-family:'DM_Sans',Helvetica] text-xs text-flint hover:bg-[#2a2a2a]"
-                        data-testid={`button-preset-eur-${v}`}
-                      >
-                        €{v}
-                      </Button>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="rounded-2xl border border-[#2e2e2e] bg-[#1a1a1a] shadow-none">
-                <CardContent className="flex flex-col gap-4 px-6 py-5">
-                  <div className="flex items-center justify-between">
-                    <div className="[font-family:'DM_Sans',Helvetica] text-[13px] font-semibold tracking-[0.80px] text-flint uppercase">
-                      Destinataire
-                    </div>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => setSelectedRecipient(selectedRecipient === "new" ? 0 : "new")}
-                      className="h-7 text-[11px] text-tradewind hover:bg-aztec"
-                    >
-                      {selectedRecipient === "new" ? "← Mes contacts" : "+ Nouveau"}
-                    </Button>
-                  </div>
-
-                  {selectedRecipient === "new" ? (
-                    <div className="flex flex-col gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <div className="flex flex-col gap-1.5">
-                        <Label className="text-[11px] text-flint px-1">Nom complet</Label>
-                        <Input
-                          placeholder="Ex: Jean Dupont"
-                          value={manualRecipient.name}
-                          onChange={(e) => setManualRecipient({ ...manualRecipient, name: e.target.value })}
-                          className="h-10 rounded-xl border-[#2e2e2e] bg-[#212121] text-pampas focus-visible:ring-tradewind"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-1.5">
-                        <Label className="text-[11px] text-flint px-1">Numéro de téléphone (Mobile Money)</Label>
-                        <Input
-                          placeholder="+229 00 00 00 00"
-                          value={manualRecipient.phone}
-                          onChange={(e) => setManualRecipient({ ...manualRecipient, phone: e.target.value })}
-                          className="h-10 rounded-xl border-[#2e2e2e] bg-[#212121] text-pampas focus-visible:ring-tradewind"
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <>
+          {workflow === "compose" && (
+            <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
+              <div className="flex flex-col gap-5">
+                <Card className="rounded-2xl border border-[#6ec4a726] bg-aztec shadow-none">
+                  <CardContent className="flex flex-col gap-4 px-6 py-5">
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="amount" className="[font-family:'DM_Sans',Helvetica] text-sm font-medium text-pampas">
+                        Montant à envoyer (€)
+                      </Label>
                       <div className="relative">
                         <Input
-                          placeholder="Chercher un destinataire…"
-                          className="h-9 rounded-full border-[#2e2e2e] bg-[#2a2a2a] pl-4 pr-3.5 [font-family:'DM_Sans',Helvetica] text-[13px] text-pampas placeholder:text-pale-sky focus-visible:ring-0 focus-visible:ring-offset-0"
-                          data-testid="input-search-recipient"
+                          id="amount"
+                          type="number"
+                          value={amount}
+                          onChange={(e) => setAmount(e.target.value)}
+                          className="h-12 rounded-xl border-[#2e2e2e] bg-[#1a1a1a] pr-16 text-right [font-family:'DM_Mono',Helvetica] text-xl font-medium text-pampas placeholder:text-flint focus:border-tradewind focus:ring-tradewind"
+                          placeholder="0.00"
                         />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 [font-family:'DM_Sans',Helvetica] text-sm font-medium text-flint">
+                          €
+                        </span>
                       </div>
-                      <div className="flex flex-col gap-2">
-                        {recipients.map((r, i) => (
-                          <button
-                            key={r.name}
-                            type="button"
-                            onClick={() => setSelectedRecipient(i)}
-                            data-testid={`button-recipient-${i}`}
-                            className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-left transition-colors ${
-                              selectedRecipient === i
-                                ? "border-[#6ec4a766] bg-aztec"
-                                : "border-[#2e2e2e] bg-[#212121] hover:border-[#3e3e3e]"
+                      <div className="[font-family:'DM_Sans',Helvetica] text-xs text-flint">
+                        ≈ {xofAmount} XOF au taux de 655 XOF/€
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <Label className="[font-family:'DM_Sans',Helvetica] text-sm font-medium text-pampas">
+                        Destinataire
+                      </Label>
+                      <div className="grid gap-3">
+                        {recipients.map((recipient, index) => (
+                          <div
+                            key={index}
+                            onClick={() => setSelectedRecipient(index)}
+                            className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition-colors ${
+                              selectedRecipient === index
+                                ? "border-tradewind bg-[#1f1f1f]"
+                                : "border-[#2e2e2e] bg-[#1a1a1a] hover:border-[#3e3e3e]"
                             }`}
                           >
-                            <img className="h-9 w-9 shrink-0" alt={r.name} src={r.avatarSrc} />
-                            <div className="flex flex-1 flex-col">
-                              <span className={`[font-family:'DM_Sans',Helvetica] text-[13px] font-medium ${selectedRecipient === i ? "text-tradewind" : "text-pampas"}`}>
-                                {r.name}
+                            <img className="h-10 w-10 shrink-0 rounded-full" alt={recipient.name} src={recipient.avatarSrc} />
+                            <div className="flex min-w-0 flex-1 flex-col">
+                              <span className="[font-family:'DM_Sans',Helvetica] text-sm font-medium text-pampas">
+                                {recipient.name}
                               </span>
-                              <span className="[font-family:'DM_Sans',Helvetica] text-[11px] text-flint">
-                                {r.phone} · {r.country}
+                              <span className="[font-family:'DM_Sans',Helvetica] text-xs text-flint">
+                                {recipient.phone} · {recipient.country}
                               </span>
                             </div>
-                            {selectedRecipient === i && (
-                              <div className="h-4 w-4 rounded-full border-2 border-tradewind bg-aztec flex items-center justify-center">
-                                <div className="h-2 w-2 rounded-full bg-tradewind" />
-                              </div>
-                            )}
-                          </button>
+                          </div>
                         ))}
-                      </div>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
 
-            <div className="flex flex-col gap-4">
-              <Card className="rounded-2xl border border-[#2e2e2e] bg-[#1a1a1a] shadow-none">
-                <CardContent className="flex flex-col gap-4 px-5 py-5">
-                  <div className="[font-family:'DM_Sans',Helvetica] text-[13px] font-semibold tracking-[0.80px] text-flint uppercase">
-                    Récapitulatif
-                  </div>
-                  <div className="flex flex-col gap-2.5 border-b border-[#1f1f1f] pb-4">
-                    {[
-                      { label: "Envoi", value: `€${amount || "0.00"}` },
-                      { label: "Frais (0.2%)", value: `€${fees}` },
-                      { label: "Taux de change", value: "655 XOF/€" },
-                      { label: "Destinataire", value: currentRecipientName },
-                      { label: "Délai", value: "Instantané" },
-                    ].map((row) => (
-                      <div key={row.label} className="flex items-center justify-between">
-                        <span className="[font-family:'DM_Sans',Helvetica] text-[12px] text-flint">{row.label}</span>
-                        <span className="max-w-[150px] truncate text-right [font-family:'DM_Mono',Helvetica] text-[12px] font-medium text-pampas">{row.value}</span>
+                        <div
+                          onClick={() => setSelectedRecipient("new")}
+                          className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition-colors ${
+                            selectedRecipient === "new"
+                              ? "border-tradewind bg-[#1f1f1f]"
+                              : "border-[#2e2e2e] bg-[#1a1a1a] hover:border-[#3e3e3e]"
+                          }`}
+                        >
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#2e2e2e]">
+                            <span className="text-lg">+</span>
+                          </div>
+                          <div className="flex min-w-0 flex-1 flex-col">
+                            <span className="[font-family:'DM_Sans',Helvetica] text-sm font-medium text-pampas">
+                              Nouveau destinataire
+                            </span>
+                            <span className="[font-family:'DM_Sans',Helvetica] text-xs text-flint">
+                              Ajouter manuellement
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                    ))}
+
+                      {selectedRecipient === "new" && (
+                        <div className="mt-3 grid gap-3 rounded-xl border border-[#2e2e2e] bg-[#1a1a1a] p-4">
+                          <div className="grid gap-2">
+                            <Label htmlFor="name" className="[font-family:'DM_Sans',Helvetica] text-xs font-medium text-flint uppercase tracking-wide">
+                              Nom complet
+                            </Label>
+                            <Input
+                              id="name"
+                              value={manualRecipient.name}
+                              onChange={(e) => setManualRecipient(prev => ({ ...prev, name: e.target.value }))}
+                              className="h-10 rounded-lg border-[#2e2e2e] bg-transparent [font-family:'DM_Sans',Helvetica] text-sm text-pampas placeholder:text-flint focus:border-tradewind"
+                              placeholder="Ex: Jean Dupont"
+                            />
+                          </div>
+                          <div className="grid gap-2">
+                            <Label htmlFor="phone" className="[font-family:'DM_Sans',Helvetica] text-xs font-medium text-flint uppercase tracking-wide">
+                              Numéro de téléphone
+                            </Label>
+                            <Input
+                              id="phone"
+                              value={manualRecipient.phone}
+                              onChange={(e) => setManualRecipient(prev => ({ ...prev, phone: e.target.value }))}
+                              className="h-10 rounded-lg border-[#2e2e2e] bg-transparent [font-family:'DM_Sans',Helvetica] text-sm text-pampas placeholder:text-flint focus:border-tradewind"
+                              placeholder="Ex: +225 07 00 00 00 00"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col gap-3 pt-2">
+                      <div className="flex items-center justify-between [font-family:'DM_Sans',Helvetica] text-sm">
+                        <span className="text-flint">Frais de transaction</span>
+                        <span className="text-pampas">{fees} €</span>
+                      </div>
+                      <div className="flex items-center justify-between [font-family:'DM_Sans',Helvetica] text-sm">
+                        <span className="text-flint">Taux de change</span>
+                        <span className="text-pampas">655 XOF/€</span>
+                      </div>
+                      <div className="flex items-center justify-between [font-family:'DM_Sans',Helvetica] text-base font-medium">
+                        <span className="text-pampas">Total à recevoir</span>
+                        <span className="text-tradewind">{xofAmount} XOF</span>
+                      </div>
+                    </div>
+
+                    <Button
+                      onClick={async () => {
+                        if (!isFormValid || isSending) return;
+                        setIsSending(true);
+                        try {
+                          await sendTransfer({
+                            recipient: currentRecipientName,
+                            country: currentRecipientCountry,
+                            amountEUR: amountNumber,
+                            amountXOF: amountNumber * 655,
+                            feesEUR: amountNumber * 0.002
+                          });
+                          setLastTransferId(`TXN-${Date.now()}`);
+                          setWorkflow("blockchain");
+                        } finally {
+                          setIsSending(false);
+                        }
+                      }}
+                      disabled={!isFormValid || isSending}
+                      className="h-12 w-full rounded-xl bg-tradewind text-[#0d0d0d] hover:bg-tradewind disabled:opacity-50 [font-family:'DM_Sans',Helvetica] text-sm font-medium"
+                    >
+                      {isSending ? "Envoi en cours..." : `Envoyer ${amount} €`}
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="rounded-2xl border border-[#6ec4a726] bg-aztec shadow-none">
+                  <CardContent className="flex flex-col gap-[3px] px-5 py-4">
+                    <p className="[font-family:'DM_Sans',Helvetica] text-[10px] font-bold tracking-[0.80px] text-tradewind-60 uppercase">
+                      Économies réalisées
+                    </p>
+                    <p className="[font-family:'DM_Mono',Helvetica] text-[22px] font-medium text-tradewind">68 600 XOF</p>
+                    <p className="[font-family:'DM_Sans',Helvetica] text-[11px] text-elm">économisés ce mois vs services traditionnels</p>
+                    <Badge className="mt-1 w-fit rounded border border-[#6ec4a74c] bg-aztec px-2.5 py-[3px] [font-family:'DM_Sans',Helvetica] text-[10px] font-bold tracking-[0.50px] text-tradewind hover:bg-aztec">
+                      Objectif ODD 10 : &lt; 3% ✓
+                    </Badge>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="flex flex-col gap-5">
+                <Card className="rounded-2xl border border-[#6ec4a726] bg-aztec shadow-none">
+                  <CardContent className="flex flex-col gap-4 px-6 py-5">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-tradewind">
+                        <span className="text-sm">🔒</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="[font-family:'DM_Sans',Helvetica] text-sm font-medium text-pampas">
+                          Sécurité garantie
+                        </span>
+                        <span className="[font-family:'DM_Sans',Helvetica] text-xs text-flint">
+                          Chiffrement end-to-end
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-tradewind">
+                        <span className="text-sm">⚡</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="[font-family:'DM_Sans',Helvetica] text-sm font-medium text-pampas">
+                          Transfert instantané
+                        </span>
+                        <span className="[font-family:'DM_Sans',Helvetica] text-xs text-flint">
+                          Réception en 5 minutes
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-tradewind">
+                        <span className="text-sm">🌍</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="[font-family:'DM_Sans',Helvetica] text-sm font-medium text-pampas">
+                          Couverture panafricaine
+                        </span>
+                        <span className="[font-family:'DM_Sans',Helvetica] text-xs text-flint">
+                          14 pays desservis
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="rounded-2xl border border-[#6ec4a726] bg-aztec shadow-none">
+                  <CardContent className="flex flex-col gap-4 px-6 py-5">
+                    <h3 className="[font-family:'DM_Sans',Helvetica] text-lg font-medium text-pampas">
+                      Statut du transfert
+                    </h3>
+                    <div className="flex items-center gap-3">
+                      <div className={`flex h-3 w-3 items-center justify-center rounded-full ${
+                        workflowStatus === "Confirmé" ? "bg-green-500" :
+                        workflowStatus === "En cours" ? "bg-yellow-500" : "bg-gray-500"
+                      }`}>
+                        <span className="text-xs">●</span>
+                      </div>
+                      <span className="[font-family:'DM_Sans',Helvetica] text-sm text-pampas">
+                        {workflowStatus}
+                      </span>
+                    </div>
+                    {lastTransferId && (
+                      <div className="rounded-lg bg-[#1a1a1a] p-3">
+                        <div className="[font-family:'DM_Sans',Helvetica] text-xs text-flint">
+                          ID de transaction
+                        </div>
+                        <div className="[font-family:'DM_Mono',Helvetica] text-sm font-medium text-pampas">
+                          {lastTransferId}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+
+          {workflow === "blockchain" && (
+            <div className="flex flex-col items-center gap-8 py-12">
+              <div className="flex flex-col items-center gap-4 text-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-tradewind">
+                  <span className="text-2xl">⛓️</span>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <h2 className="[font-family:'DM_Sans',Helvetica] text-2xl font-medium text-pampas">
+                    Validation blockchain en cours...
+                  </h2>
+                  <p className="[font-family:'DM_Sans',Helvetica] text-sm text-flint">
+                    Votre transfert de {amount} € vers {currentRecipientName} est en cours de validation sur la blockchain.
+                  </p>
+                </div>
+              </div>
+              <Card className="w-full max-w-md rounded-2xl border border-[#6ec4a726] bg-aztec shadow-none">
+                <CardContent className="flex flex-col gap-4 px-6 py-6">
+                  <div className="flex items-center justify-between">
+                    <span className="[font-family:'DM_Sans',Helvetica] text-sm text-flint">Transaction ID</span>
+                    <span className="[font-family:'DM_Mono',Helvetica] text-xs font-medium text-pampas">{lastTransferId}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="[font-family:'DM_Sans',Helvetica] text-[13px] font-semibold text-pampas">Reçu</span>
-                    <span className="[font-family:'DM_Mono',Helvetica] text-[18px] font-medium text-tradewind">{xofAmount} XOF</span>
+                    <span className="[font-family:'DM_Sans',Helvetica] text-sm text-flint">Destinataire</span>
+                    <span className="[font-family:'DM_Sans',Helvetica] text-sm text-pampas">{currentRecipientName}</span>
                   </div>
-                  {workflow === "compose" ? (
-                    <Button
-                      className="mt-2 h-11 w-full rounded-xl bg-tradewind text-[#0d0d0d] hover:bg-tradewind cursor-pointer"
-                      disabled={!isFormValid}
-                      onClick={handleConfirmSend}
-                      data-testid="button-confirm-send"
-                    >
-                      <span className="[font-family:'DM_Sans',Helvetica] text-[13px] font-medium">Envoyer maintenant</span>
-                    </Button>
-                  ) : workflow === "blockchain" ? (
-                    <Button className="mt-2 h-11 w-full rounded-xl bg-[#6c6c6c] text-[#f8f8f8]" disabled>
-                      <span className="[font-family:'DM_Sans',Helvetica] text-[13px] font-medium">Transaction en cours sur la blockchain...</span>
-                    </Button>
-                  ) : (
-                    <div className="space-y-3">
-                      <div className="rounded-2xl border border-[#2e2e2e] bg-[#212121] p-4 text-sm text-pampas">
-                        Transaction confirmée sur la blockchain et reçue par {currentRecipientName}.
-                      </div>
-                      <Link
-                        href="/expediteur/historique"
-                        className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-tradewind text-[#0d0d0d] text-[13px] font-medium hover:bg-tradewind"
-                      >
-                        Voir l'historique
-                      </Link>
-                      <Link
-                        href="/wallet"
-                        className="inline-flex h-11 w-full items-center justify-center rounded-xl border border-[#2e2e2e] bg-transparent text-[13px] font-medium text-pampas hover:bg-[#1f1f1f]"
-                      >
-                        Aller au wallet
-                      </Link>
-                    </div>
-                  )}
-                  <p className="text-center [font-family:'DM_Sans',Helvetica] text-[11px] text-flint">
-                    Frais : &lt;0.2% · Objectif ODD 10 ✓
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="rounded-2xl border border-[#6ec4a726] bg-aztec shadow-none">
-                <CardContent className="flex flex-col gap-[3px] px-5 py-4">
-                  <p className="[font-family:'DM_Sans',Helvetica] text-[10px] font-bold tracking-[0.80px] text-tradewind-60 uppercase">
-                    Économies réalisées
-                  </p>
-                  <p className="[font-family:'DM_Mono',Helvetica] text-[22px] font-medium text-tradewind">68 600 XOF</p>
-                  <p className="[font-family:'DM_Sans',Helvetica] text-[11px] text-elm">économisés ce mois vs services traditionnels</p>
-                  <Badge className="mt-1 w-fit rounded border border-[#6ec4a74c] bg-aztec px-2.5 py-[3px] [font-family:'DM_Sans',Helvetica] text-[10px] font-bold tracking-[0.50px] text-tradewind hover:bg-aztec">
-                    Objectif ODD 10 : &lt; 3% ✓
-                  </Badge>
+                  <div className="flex items-center justify-between">
+                    <span className="[font-family:'DM_Sans',Helvetica] text-sm text-flint">Montant</span>
+                    <span className="[font-family:'DM_Sans',Helvetica] text-sm text-pampas">{amount} €</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="[font-family:'DM_Sans',Helvetica] text-sm text-flint">Statut</span>
+                    <Badge className="rounded border border-yellow-500/20 bg-yellow-500/10 px-2 py-1 [font-family:'DM_Sans',Helvetica] text-xs font-medium text-yellow-500">
+                      En cours
+                    </Badge>
+                  </div>
                 </CardContent>
               </Card>
             </div>
-          </div>
+          )}
+
+          {workflow === "success" && (
+            <div className="flex flex-col items-center gap-8 py-12">
+              <div className="flex flex-col items-center gap-4 text-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-500">
+                  <span className="text-2xl">✅</span>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <h2 className="[font-family:'DM_Sans',Helvetica] text-2xl font-medium text-pampas">
+                    Transfert réussi !
+                  </h2>
+                  <p className="[font-family:'DM_Sans',Helvetica] text-sm text-flint">
+                    Votre transfert de {amount} € vers {currentRecipientName} a été confirmé sur la blockchain.
+                  </p>
+                </div>
+              </div>
+              <Card className="w-full max-w-md rounded-2xl border border-[#6ec4a726] bg-aztec shadow-none">
+                <CardContent className="flex flex-col items-center gap-6 px-6 py-8 text-center">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-tradewind">
+                    <span className="text-2xl">✅</span>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <h3 className="[font-family:'DM_Sans',Helvetica] text-xl font-semibold text-pampas">
+                      Transfert confirmé
+                    </h3>
+                    <p className="[font-family:'DM_Sans',Helvetica] text-sm text-flint">
+                      {currentRecipientName} recevra {xofAmount} XOF dans les prochaines minutes.
+                    </p>
+                  </div>
+                  <div className="flex gap-3 w-full">
+                    <Button asChild variant="outline" className="flex-1 rounded-xl border-[#2e2e2e] bg-transparent hover:bg-transparent">
+                      <Link href="/expediteur/historique" className="[font-family:'DM_Sans',Helvetica] text-sm font-medium text-twine">
+                        Voir l'historique
+                      </Link>
+                    </Button>
+                    <Button asChild className="flex-1 rounded-xl bg-tradewind text-[#0d0d0d] hover:bg-tradewind">
+                      <Link href="/expediteur" className="[font-family:'DM_Sans',Helvetica] text-sm font-medium">
+                        Nouveau transfert
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
 
         <footer className="w-full border-t border-[#1f1f1f] bg-transparent">

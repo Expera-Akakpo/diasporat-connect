@@ -7,7 +7,7 @@ interface TransactionRowProps {
 
 export default function TransactionRow({ name, date, amount, fees }: TransactionRowProps) {
   return (
-    <div className="bg-white p-3 rounded-xl shadow-sm flex justify-between">
+    <div className="p-3 rounded-xl shadow-sm flex justify-between text-gray-300">
       <div>
         <div className="font-medium">{name}</div>
         <div className="text-xs text-gray-400">{date}</div>

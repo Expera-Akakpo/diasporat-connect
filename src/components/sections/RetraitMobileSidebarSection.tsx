@@ -21,7 +21,7 @@ const bottomNavItems = [
 export const RetraitMobileSidebarSection = (): JSX.Element => {
   const { walletBalance } = useTransaction();
   return (
-    <section className="relative w-full overflow-hidden border border-[#0000001a] bg-white">
+    <section className="relative w-full overflow-hidden border border-[#0000001a]">
       <div className="flex w-full justify-end bg-black px-2 py-0 sm:px-4">
         <div className="flex w-full max-w-[358px] justify-center pb-1.5">
           <article className="flex min-h-[814px] w-full flex-col overflow-hidden rounded-[36px] border border-solid border-[#2a2a2a] bg-[radial-gradient(50%_50%_at_50%_50%,rgba(44,34,24,1)_0%,rgba(17,17,16,1)_100%)] shadow-[0px_32px_80px_#000000cc]">
