@@ -5,6 +5,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { UserMenu } from "@/components/UserMenu";
+import { Label } from "@/components/ui/label";
+import { useTransfer } from "@/hooks/useTransfer";
+import { Loader2, CheckCircle2, AlertCircle, Info } from "lucide-react";
 
 const navItems = [
   { label: "Envoyer", href: "/expediteur", active: true },
@@ -18,19 +21,41 @@ const footerLinks = [
 ];
 
 const recipients = [
-  { avatarSrc: "/figmaAssets/background-border-6.svg", name: "Amadou Mbaye", phone: "+221 77 000 00 00", country: "🇸🇳 Sénégal" },
-  { avatarSrc: "/figmaAssets/background-border-1.svg", name: "Fatou Diallo", phone: "+225 07 000 00 00", country: "🇨🇮 Côte d'Ivoire" },
+  { avatarSrc: "/figmaAssets/background-border-6.svg", name: "Amadou Mbaye", phone: "+221 77 000 00 00", country: "🇸🇳 Sénégal", wallet: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e" },
+  { avatarSrc: "/figmaAssets/background-border-1.svg", name: "Fatou Diallo", phone: "+225 07 000 00 00", country: "🇨🇮 Côte d'Ivoire", wallet: "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC" },
 ];
 
 export const ExpéditeurSection = (): JSX.Element => {
   const [amount, setAmount] = useState("");
   const [selectedRecipient, setSelectedRecipient] = useState<number | "new">(0);
-  const [manualRecipient, setManualRecipient] = useState({ name: "", phone: "", country: "🇧🇯 Bénin" });
+  const [manualRecipient, setManualRecipient] = useState({ name: "", phone: "", country: "🇧🇯 Bénin", wallet: "" });
+
+  const {
+    isSimulationMode,
+    status,
+    txHash,
+    error,
+    account,
+    connectWallet,
+    sendMoney,
+    toggleSimulationMode
+  } = useTransfer();
 
   const xofAmount = amount ? Math.round(parseFloat(amount.replace(",", ".")) * 655).toLocaleString("fr-FR") : "—";
   const fees = amount ? (parseFloat(amount.replace(",", ".")) * 0.002).toFixed(2) : "0.00";
 
   const currentRecipientName = selectedRecipient === "new" ? manualRecipient.name || "Nouveau destinataire" : recipients[selectedRecipient].name;
+  const currentRecipientWallet = selectedRecipient === "new" ? manualRecipient.wallet : recipients[selectedRecipient].wallet;
+
+  const handleSend = async () => {
+    if (!amount || parseFloat(amount) <= 0) return;
+    
+    // Convert EUR to ETH for simulation/blockchain (using a fixed mock rate for demo)
+    // 1 ETH ≈ 2400 EUR => amount / 2400
+    const ethAmount = (parseFloat(amount) / 2400).toFixed(6);
+    
+    await sendMoney(currentRecipientWallet || "0x0000000000000000000000000000000000000000", ethAmount);
+  };
 
   return (
     <section className="relative w-full overflow-hidden rounded-sm border border-[#0000001a] bg-white">
@@ -62,6 +87,21 @@ export const ExpéditeurSection = (): JSX.Element => {
               ))}
             </nav>
             <div className="flex items-center gap-2.5">
+              <div className="flex flex-col items-end mr-2">
+                {account ? (
+                  <span className="text-[10px] text-flint font-mono">{account.substring(0, 6)}...{account.substring(account.length-4)}</span>
+                ) : (
+                  <Button onClick={connectWallet} variant="ghost" className="h-7 text-[11px] text-tradewind">
+                    Connecter Wallet
+                  </Button>
+                )}
+                <button 
+                  onClick={toggleSimulationMode}
+                  className="text-[9px] text-tradewind-60 underline hover:text-tradewind"
+                >
+                  {isSimulationMode ? "Mode Simulation [ON]" : "Passer en Simulation"}
+                </button>
+              </div>
               <Button asChild variant="outline" className="h-auto rounded-full border-[#2e2e2e] bg-transparent px-4 py-[7px] hover:bg-transparent">
                 <Link href="/wallet" className="[font-family:'DM_Sans',Helvetica] text-xs font-medium text-tradewind">
                   Interface Destinataire →
@@ -84,6 +124,13 @@ export const ExpéditeurSection = (): JSX.Element => {
 
           <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
             <div className="flex flex-col gap-5">
+              {isSimulationMode && (
+                <div className="flex items-center gap-2 rounded-xl bg-aztec/30 border border-tradewind/20 px-4 py-3 text-tradewind text-xs">
+                  <Info className="h-4 w-4" />
+                  <span>Mode Démo actif : Les transactions sont simulées sans frais réels.</span>
+                </div>
+              )}
+
               <Card className="rounded-2xl border border-[#2e2e2e] bg-[#1a1a1a] shadow-none">
                 <CardContent className="flex flex-col gap-5 px-6 py-5">
                   <div className="[font-family:'DM_Sans',Helvetica] text-[13px] font-semibold tracking-[0.80px] text-flint uppercase">
@@ -143,18 +190,18 @@ export const ExpéditeurSection = (): JSX.Element => {
                       <div className="flex flex-col gap-1.5">
                         <Label className="text-[11px] text-flint px-1">Nom complet</Label>
                         <Input
-                          placeholder="Ex: Jean Dupont"
+                          placeholder="Ex: jean miabehackathon"
                           value={manualRecipient.name}
                           onChange={(e) => setManualRecipient({ ...manualRecipient, name: e.target.value })}
                           className="h-10 rounded-xl border-[#2e2e2e] bg-[#212121] text-pampas focus-visible:ring-tradewind"
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
-                        <Label className="text-[11px] text-flint px-1">Numéro de téléphone (Mobile Money)</Label>
+                        <Label className="text-[11px] text-flint px-1">Adresse Wallet (ETH)</Label>
                         <Input
-                          placeholder="+229 00 00 00 00"
-                          value={manualRecipient.phone}
-                          onChange={(e) => setManualRecipient({ ...manualRecipient, phone: e.target.value })}
+                          placeholder="0x..."
+                          value={manualRecipient.wallet}
+                          onChange={(e) => setManualRecipient({ ...manualRecipient, wallet: e.target.value })}
                           className="h-10 rounded-xl border-[#2e2e2e] bg-[#212121] text-pampas focus-visible:ring-tradewind"
                         />
                       </div>
@@ -228,13 +275,52 @@ export const ExpéditeurSection = (): JSX.Element => {
                     <span className="[font-family:'DM_Sans',Helvetica] text-[13px] font-semibold text-pampas">Reçu</span>
                     <span className="[font-family:'DM_Mono',Helvetica] text-[18px] font-medium text-tradewind">{xofAmount} XOF</span>
                   </div>
-                  <Button
-                    className="mt-2 h-11 w-full rounded-xl bg-tradewind text-[#0d0d0d] hover:bg-tradewind"
-                    disabled={!amount || parseFloat(amount) <= 0}
-                    data-testid="button-confirm-send"
-                  >
-                    <span className="[font-family:'DM_Sans',Helvetica] text-[13px] font-medium">Envoyer maintenant</span>
-                  </Button>
+
+                  {status === "idle" && (
+                    <Button
+                      onClick={handleSend}
+                      className="mt-2 h-11 w-full rounded-xl bg-tradewind text-[#0d0d0d] hover:bg-tradewind"
+                      disabled={!amount || parseFloat(amount) <= 0}
+                      data-testid="button-confirm-send"
+                    >
+                      <span className="[font-family:'DM_Sans',Helvetica] text-[13px] font-medium">Envoyer maintenant</span>
+                    </Button>
+                  )}
+
+                  {(status === "loading" || status === "connecting") && (
+                    <Button disabled className="mt-2 h-11 w-full rounded-xl bg-aztec text-tradewind">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {status === "connecting" ? "Connexion Wallet..." : "Transfert en cours..."}
+                    </Button>
+                  )}
+
+                  {status === "success" && (
+                    <div className="mt-2 flex flex-col gap-2">
+                      <div className="flex items-center gap-2 rounded-xl bg-aztec/50 p-3 text-tradewind border border-tradewind/20">
+                        <CheckCircle2 className="h-5 w-5 shrink-0" />
+                        <div className="flex flex-col overflow-hidden">
+                          <span className="text-xs font-bold">Transfert Confirmé !</span>
+                          <span className="text-[10px] font-mono truncate">{txHash}</span>
+                        </div>
+                      </div>
+                      <Button onClick={() => window.location.reload()} variant="outline" className="w-full border-[#2e2e2e] text-flint">
+                        Nouvel envoi
+                      </Button>
+                    </div>
+                  )}
+
+                  {status === "error" && (
+                    <div className="mt-2 flex flex-col gap-2">
+                      <div className="flex items-center gap-2 rounded-xl bg-red-900/20 p-3 text-red-400 border border-red-900/40">
+                        <AlertCircle className="h-5 w-5 shrink-0" />
+                        <span className="text-xs">{error || "Une erreur est survenue"}</span>
+                      </div>
+                      <Button onClick={handleSend} className="w-full bg-tradewind text-[#0d0d0d]">
+                        Réessayer
+                      </Button>
+                    </div>
+                  )}
+
                   <p className="text-center [font-family:'DM_Sans',Helvetica] text-[11px] text-flint">
                     Frais : &lt;0.2% · Objectif ODD 10 ✓
                   </p>
