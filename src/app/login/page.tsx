@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -34,8 +34,15 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isPending, setIsPending] = useState(false);
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const router = useRouter();
+
+  // Rediriger si déjà connecté
+  useEffect(() => {
+    if (user) {
+      router.push(user.role === "expediteur" ? "/expediteur" : "/wallet");
+    }
+  }, [user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

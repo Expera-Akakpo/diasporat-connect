@@ -1,16 +1,20 @@
 "use client";
 
+import { useIsMobile } from "@/hooks/use-mobile";
 import { WalletHomeSection } from "@/components/sections/WalletHomeSection";
 import { WalletMobileSidebarSection } from "@/components/sections/WalletMobileSidebarSection";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 export default function WalletPage() {
+  const isMobile = useIsMobile();
+
   return (
     <ProtectedRoute>
-      <div className="grid min-w-[1814px] grid-cols-[77fr_19fr]">
-        <WalletHomeSection />
+      {isMobile ? (
         <WalletMobileSidebarSection />
-      </div>
+      ) : (
+        <WalletHomeSection />
+      )}
     </ProtectedRoute>
   );
 }

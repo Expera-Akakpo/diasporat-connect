@@ -53,13 +53,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) setUser(JSON.parse(stored));
-    } catch {
-      localStorage.removeItem(STORAGE_KEY);
-    }
-    setIsLoading(false);
+    const initAuth = () => {
+      try {
+        if (typeof window !== "undefined") {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (stored) {
+            setUser(JSON.parse(stored));
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load auth state:", error);
+        try {
+          localStorage.removeItem(STORAGE_KEY);
+        } catch {}
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initAuth();
   }, []);
 
   const login = async (email: string, password: string): Promise<AuthUser> => {

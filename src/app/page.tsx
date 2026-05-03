@@ -1,13 +1,15 @@
 "use client";
 
+import { useIsMobile } from "@/hooks/use-mobile";
 import { AccueilHomeSection } from "@/components/sections/AccueilHomeSection";
 import { AccueilMobileSidebarSection } from "@/components/sections/AccueilMobileSidebarSection";
 
 export default function HomePage() {
-  return (
-    <div className="grid min-w-[1814px] grid-cols-[77fr_19fr]">
-      <AccueilHomeSection />
-      <AccueilMobileSidebarSection />
-    </div>
-  );
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return <AccueilMobileSidebarSection />;
+  }
+
+  return <AccueilHomeSection />;
 }

@@ -24,10 +24,13 @@ const recipients = [
 
 export const ExpéditeurSection = (): JSX.Element => {
   const [amount, setAmount] = useState("");
-  const [selectedRecipient, setSelectedRecipient] = useState(0);
+  const [selectedRecipient, setSelectedRecipient] = useState<number | "new">(0);
+  const [manualRecipient, setManualRecipient] = useState({ name: "", phone: "", country: "🇧🇯 Bénin" });
 
   const xofAmount = amount ? Math.round(parseFloat(amount.replace(",", ".")) * 655).toLocaleString("fr-FR") : "—";
   const fees = amount ? (parseFloat(amount.replace(",", ".")) * 0.002).toFixed(2) : "0.00";
+
+  const currentRecipientName = selectedRecipient === "new" ? manualRecipient.name || "Nouveau destinataire" : recipients[selectedRecipient].name;
 
   return (
     <section className="relative w-full overflow-hidden rounded-sm border border-[#0000001a] bg-white">
@@ -121,46 +124,82 @@ export const ExpéditeurSection = (): JSX.Element => {
 
               <Card className="rounded-2xl border border-[#2e2e2e] bg-[#1a1a1a] shadow-none">
                 <CardContent className="flex flex-col gap-4 px-6 py-5">
-                  <div className="[font-family:'DM_Sans',Helvetica] text-[13px] font-semibold tracking-[0.80px] text-flint uppercase">
-                    Destinataire
+                  <div className="flex items-center justify-between">
+                    <div className="[font-family:'DM_Sans',Helvetica] text-[13px] font-semibold tracking-[0.80px] text-flint uppercase">
+                      Destinataire
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => setSelectedRecipient(selectedRecipient === "new" ? 0 : "new")}
+                      className="h-7 text-[11px] text-tradewind hover:bg-aztec"
+                    >
+                      {selectedRecipient === "new" ? "← Mes contacts" : "+ Nouveau"}
+                    </Button>
                   </div>
-                  <div className="relative">
-                    <Input
-                      placeholder="Chercher un destinataire…"
-                      className="h-9 rounded-full border-[#2e2e2e] bg-[#2a2a2a] pl-4 pr-3.5 [font-family:'DM_Sans',Helvetica] text-[13px] text-pampas placeholder:text-pale-sky focus-visible:ring-0 focus-visible:ring-offset-0"
-                      data-testid="input-search-recipient"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    {recipients.map((r, i) => (
-                      <button
-                        key={r.name}
-                        type="button"
-                        onClick={() => setSelectedRecipient(i)}
-                        data-testid={`button-recipient-${i}`}
-                        className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-left transition-colors ${
-                          selectedRecipient === i
-                            ? "border-[#6ec4a766] bg-aztec"
-                            : "border-[#2e2e2e] bg-[#212121] hover:border-[#3e3e3e]"
-                        }`}
-                      >
-                        <img className="h-9 w-9 shrink-0" alt={r.name} src={r.avatarSrc} />
-                        <div className="flex flex-1 flex-col">
-                          <span className={`[font-family:'DM_Sans',Helvetica] text-[13px] font-medium ${selectedRecipient === i ? "text-tradewind" : "text-pampas"}`}>
-                            {r.name}
-                          </span>
-                          <span className="[font-family:'DM_Sans',Helvetica] text-[11px] text-flint">
-                            {r.phone} · {r.country}
-                          </span>
-                        </div>
-                        {selectedRecipient === i && (
-                          <div className="h-4 w-4 rounded-full border-2 border-tradewind bg-aztec flex items-center justify-center">
-                            <div className="h-2 w-2 rounded-full bg-tradewind" />
-                          </div>
-                        )}
-                      </button>
-                    ))}
-                  </div>
+
+                  {selectedRecipient === "new" ? (
+                    <div className="flex flex-col gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="flex flex-col gap-1.5">
+                        <Label className="text-[11px] text-flint px-1">Nom complet</Label>
+                        <Input
+                          placeholder="Ex: Jean Dupont"
+                          value={manualRecipient.name}
+                          onChange={(e) => setManualRecipient({ ...manualRecipient, name: e.target.value })}
+                          className="h-10 rounded-xl border-[#2e2e2e] bg-[#212121] text-pampas focus-visible:ring-tradewind"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <Label className="text-[11px] text-flint px-1">Numéro de téléphone (Mobile Money)</Label>
+                        <Input
+                          placeholder="+229 00 00 00 00"
+                          value={manualRecipient.phone}
+                          onChange={(e) => setManualRecipient({ ...manualRecipient, phone: e.target.value })}
+                          className="h-10 rounded-xl border-[#2e2e2e] bg-[#212121] text-pampas focus-visible:ring-tradewind"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="relative">
+                        <Input
+                          placeholder="Chercher un destinataire…"
+                          className="h-9 rounded-full border-[#2e2e2e] bg-[#2a2a2a] pl-4 pr-3.5 [font-family:'DM_Sans',Helvetica] text-[13px] text-pampas placeholder:text-pale-sky focus-visible:ring-0 focus-visible:ring-offset-0"
+                          data-testid="input-search-recipient"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        {recipients.map((r, i) => (
+                          <button
+                            key={r.name}
+                            type="button"
+                            onClick={() => setSelectedRecipient(i)}
+                            data-testid={`button-recipient-${i}`}
+                            className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-left transition-colors ${
+                              selectedRecipient === i
+                                ? "border-[#6ec4a766] bg-aztec"
+                                : "border-[#2e2e2e] bg-[#212121] hover:border-[#3e3e3e]"
+                            }`}
+                          >
+                            <img className="h-9 w-9 shrink-0" alt={r.name} src={r.avatarSrc} />
+                            <div className="flex flex-1 flex-col">
+                              <span className={`[font-family:'DM_Sans',Helvetica] text-[13px] font-medium ${selectedRecipient === i ? "text-tradewind" : "text-pampas"}`}>
+                                {r.name}
+                              </span>
+                              <span className="[font-family:'DM_Sans',Helvetica] text-[11px] text-flint">
+                                {r.phone} · {r.country}
+                              </span>
+                            </div>
+                            {selectedRecipient === i && (
+                              <div className="h-4 w-4 rounded-full border-2 border-tradewind bg-aztec flex items-center justify-center">
+                                <div className="h-2 w-2 rounded-full bg-tradewind" />
+                              </div>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -176,12 +215,12 @@ export const ExpéditeurSection = (): JSX.Element => {
                       { label: "Envoi", value: `€${amount || "0.00"}` },
                       { label: "Frais (0.2%)", value: `€${fees}` },
                       { label: "Taux de change", value: "655 XOF/€" },
-                      { label: "Destinataire", value: recipients[selectedRecipient].name },
+                      { label: "Destinataire", value: currentRecipientName },
                       { label: "Délai", value: "Instantané" },
                     ].map((row) => (
                       <div key={row.label} className="flex items-center justify-between">
                         <span className="[font-family:'DM_Sans',Helvetica] text-[12px] text-flint">{row.label}</span>
-                        <span className="[font-family:'DM_Mono',Helvetica] text-[12px] font-medium text-pampas">{row.value}</span>
+                        <span className="max-w-[150px] truncate text-right [font-family:'DM_Mono',Helvetica] text-[12px] font-medium text-pampas">{row.value}</span>
                       </div>
                     ))}
                   </div>
