@@ -179,7 +179,7 @@ export default function LoginPage() {
                 data-testid="button-submit"
                 type="submit"
                 disabled={isPending}
-                className="h-10 gap-2 rounded-lg bg-tradewind text-[#0d0d0d] hover:bg-tradewind disabled:opacity-60"
+                className="h-10 gap-2 rounded-lg bg-tradewind text-[#0d0d0d] hover:bg-tradewind disabled:opacity-60 cursor-pointer"
               >
                 {isPending ? (
                   <span className="[font-family:'DM_Sans',Helvetica] text-[13px] font-medium">

@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
+import { useTransaction } from "@/contexts/TransactionContext";
 
 const summaryCards = [
   {
@@ -67,6 +68,34 @@ const bottomNavItems = [
 ] as const;
 
 export const WalletMobileSidebarSection = (): JSX.Element => {
+  const { walletBalance, monthlyReceived, transfers } = useTransaction();
+
+  const summaryCards = [
+    {
+      title: "Solde disponible",
+      value: walletBalance.toLocaleString("fr-FR"),
+      footer: "XOF",
+      valueClassName: "text-tradewind",
+      footerType: "text",
+    },
+    {
+      title: "Reçu ce mois",
+      value: monthlyReceived.toLocaleString("fr-FR"),
+      footer: `${transfers.length} transferts`,
+      valueClassName: "text-pampas",
+      footerType: "text",
+    },
+  ] as const;
+
+  const dynamicTransfers = transfers.slice(0, 3).map((transfer) => ({
+    avatarSrc: "/figmaAssets/background-border-5.svg", // Default avatar
+    name: transfer.recipient,
+    meta: `${transfer.date} · €${transfer.amountEUR}`,
+    amount: transfer.type === "send" ? `+${transfer.amountXOF.toLocaleString("fr-FR")}` : `-${transfer.amountXOF.toLocaleString("fr-FR")}`,
+    amountClassName: transfer.type === "send" ? "text-tradewind" : "text-bronco",
+    status: transfer.status,
+    statusClassName: transfer.status === "Terminé" ? "bg-aztec text-tradewind border-[#6ec4a74c]" : "bg-racing-green text-shamrock border-[#4ade8040]",
+  }));
   return (
     <section className="relative w-full overflow-hidden border border-[#0000001a] bg-white">
       <div className="flex w-full justify-end bg-black px-2 py-0 sm:px-4">
@@ -101,7 +130,7 @@ export const WalletMobileSidebarSection = (): JSX.Element => {
                 <Card className="rounded-2xl border border-solid border-[#2e2e2e] bg-[#1a1a1a7d] shadow-none">
                   <CardContent className="px-[15px] pb-0 pt-1">
                     <ul className="flex flex-col">
-                      {transfers.map((transfer, index) => (
+                      {dynamicTransfers.map((transfer, index) => (
                         <li
                           key={`${transfer.name}-${transfer.meta}`}
                           className={`flex items-center gap-2.5 py-2.5 ${index !== transfers.length - 1 ? "border-b border-[#1f1f1f]" : ""}`}

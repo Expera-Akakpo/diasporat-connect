@@ -211,23 +211,6 @@ export const WalletHomeSection = (): JSX.Element => {
             </Card>
           </div>
         </div>
-
-        <footer className="w-full border-t border-[#1f1f1f] bg-transparent">
-          <div className="mx-auto flex w-full max-w-[1160px] flex-wrap items-center justify-between gap-6 px-6 py-7 xl:px-10">
-            <div className="inline-flex items-center gap-2">
-              <img className="h-[26px] w-[26px]" alt="DiasporaConnect" src="/figmaAssets/background-border-2.svg" />
-              <span className="[font-family:'DM_Sans',Helvetica] text-sm font-normal leading-[21px] text-flint">DiasporaConnect</span>
-            </div>
-            <nav className="inline-flex items-start gap-5" aria-label="Pied de page">
-              {footerLinks.map((link) => (
-                <Link key={link.label} href={link.href} className="[font-family:'DM_Sans',Helvetica] text-xs font-normal leading-[18px] text-flint">
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-            <div className="h-[18px] w-[120px]" />
-          </div>
-        </footer>
       </div>
     </section>
   );

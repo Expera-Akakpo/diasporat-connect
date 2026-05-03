@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
+import { useTransaction } from "@/contexts/TransactionContext";
 
 const navItems = [
   { label: "Wallet", href: "/wallet", icon: "/figmaAssets/svg.svg", active: false },
@@ -18,6 +19,7 @@ const bottomNavItems = [
 ] as const;
 
 export const RetraitMobileSidebarSection = (): JSX.Element => {
+  const { walletBalance } = useTransaction();
   return (
     <section className="relative w-full overflow-hidden border border-[#0000001a] bg-white">
       <div className="flex w-full justify-end bg-black px-2 py-0 sm:px-4">
@@ -37,7 +39,7 @@ export const RetraitMobileSidebarSection = (): JSX.Element => {
                 <Card className="rounded-2xl border border-solid border-[#6ec4a726] bg-aztec shadow-none">
                   <CardContent className="flex flex-col gap-[3px] px-4 py-4">
                     <p className="[font-family:'DM_Sans',Helvetica] text-[10px] font-bold tracking-[0.80px] text-tradewind-60 uppercase">Solde disponible</p>
-                    <p className="[font-family:'DM_Mono',Helvetica] text-[26px] font-medium text-tradewind">131 284 <span className="text-[14px] text-elm">XOF</span></p>
+                    <p className="[font-family:'DM_Mono',Helvetica] text-[26px] font-medium text-tradewind">{walletBalance.toLocaleString("fr-FR")} <span className="text-[14px] text-elm">XOF</span></p>
                     <Badge className="w-fit rounded border border-[#fbbf2440] bg-[#1f1900] px-2.5 py-[3px] [font-family:'DM_Sans',Helvetica] text-[10px] font-bold tracking-[0.50px] text-[#c4a35a] hover:bg-[#1f1900]">
                       À retirer
                     </Badge>

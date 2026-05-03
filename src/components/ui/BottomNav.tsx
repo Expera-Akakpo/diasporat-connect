@@ -13,13 +13,13 @@ export default function BottomNav({ role }: BottomNavProps) {
   const links = role === 'expediteur' 
     ? [
         { href: '/expediteur', label: 'Accueil', icon: '🏠' },
-        { href: '/expediteur/envoyer', label: 'Envoyer', icon: '✈️' },
+        { href: '/expediteur', label: 'Envoyer', icon: '✈️' }, // Same as home for now
         { href: '/expediteur/historique', label: 'Historique', icon: '📜' },
       ]
     : [
-        { href: '/destinataire', label: 'Accueil', icon: '🏠' },
-        { href: '/destinataire/retraits', label: 'Retrait', icon: '💰' },
-        { href: '/destinataire/transfers-recus', label: 'Historique', icon: '📜' },
+        { href: '/wallet', label: 'Accueil', icon: '🏠' },
+        { href: '/retrait', label: 'Retrait', icon: '💰' },
+        { href: '/historique', label: 'Historique', icon: '📜' },
       ]
 
   return (

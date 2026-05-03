@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { UserMenu } from "@/components/UserMenu";
+import { useTransaction } from "@/contexts/TransactionContext";
 
 const navItems = [
   { label: "Envoyer", href: "/expediteur", active: true },
@@ -14,7 +16,7 @@ const navItems = [
 const footerLinks = [
   { label: "Accueil", href: "/" },
   { label: "Expéditeur", href: "/expediteur" },
-  { label: "Destinataire", href: "/" },
+  { label: "Destinataire", href: "/wallet" },
 ];
 
 const recipients = [
@@ -23,14 +25,54 @@ const recipients = [
 ];
 
 export const ExpéditeurSection = (): JSX.Element => {
-  const [amount, setAmount] = useState("");
+  const { sendTransfer } = useTransaction();
+  const [amount, setAmount] = useState("200");
   const [selectedRecipient, setSelectedRecipient] = useState<number | "new">(0);
   const [manualRecipient, setManualRecipient] = useState({ name: "", phone: "", country: "🇧🇯 Bénin" });
+  const [workflow, setWorkflow] = useState<"compose" | "blockchain" | "success">("compose");
+  const [isSending, setIsSending] = useState(false);
+  const [lastTransferId, setLastTransferId] = useState<string | null>(null);
 
-  const xofAmount = amount ? Math.round(parseFloat(amount.replace(",", ".")) * 655).toLocaleString("fr-FR") : "—";
-  const fees = amount ? (parseFloat(amount.replace(",", ".")) * 0.002).toFixed(2) : "0.00";
+  const amountNumber = Number(amount.toString().replace(/\s/g, "").replace(",", "."));
+  const xofAmount = amountNumber > 0 ? Math.round(amountNumber * 655).toLocaleString("fr-FR") : "—";
+  const fees = amountNumber > 0 ? (amountNumber * 0.002).toFixed(2) : "0.00";
 
   const currentRecipientName = selectedRecipient === "new" ? manualRecipient.name || "Nouveau destinataire" : recipients[selectedRecipient].name;
+  const currentRecipientCountry = selectedRecipient === "new" ? manualRecipient.country : recipients[selectedRecipient].country;
+  const currentRecipientPhone = selectedRecipient === "new" ? manualRecipient.phone : recipients[selectedRecipient].phone;
+
+  const isFormValid = amountNumber > 0 && Boolean(currentRecipientName) && Boolean(currentRecipientPhone);
+
+  const workflowStatus = workflow === "success" ? "Confirmé" : workflow === "blockchain" ? "En cours" : "Prêt";
+
+  useEffect(() => {
+    if (workflow !== "blockchain" || isSending) return;
+
+    const send = async () => {
+      setIsSending(true);
+      try {
+        const transfer = await sendTransfer({
+          recipient: currentRecipientName,
+          country: currentRecipientCountry,
+          amountEUR: amountNumber,
+          amountXOF: Math.round(amountNumber * 655),
+          feesEUR: Number(fees),
+        });
+        setLastTransferId(transfer.id);
+        setWorkflow("success");
+      } finally {
+        setIsSending(false);
+      }
+    };
+
+    send();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workflow]);
+
+  const handleConfirmSend = () => {
+    if (!isFormValid) return;
+    setWorkflow("blockchain");
+  };
 
   return (
     <section className="relative w-full overflow-hidden rounded-sm border border-[#0000001a] bg-white">
@@ -228,13 +270,38 @@ export const ExpéditeurSection = (): JSX.Element => {
                     <span className="[font-family:'DM_Sans',Helvetica] text-[13px] font-semibold text-pampas">Reçu</span>
                     <span className="[font-family:'DM_Mono',Helvetica] text-[18px] font-medium text-tradewind">{xofAmount} XOF</span>
                   </div>
-                  <Button
-                    className="mt-2 h-11 w-full rounded-xl bg-tradewind text-[#0d0d0d] hover:bg-tradewind"
-                    disabled={!amount || parseFloat(amount) <= 0}
-                    data-testid="button-confirm-send"
-                  >
-                    <span className="[font-family:'DM_Sans',Helvetica] text-[13px] font-medium">Envoyer maintenant</span>
-                  </Button>
+                  {workflow === "compose" ? (
+                    <Button
+                      className="mt-2 h-11 w-full rounded-xl bg-tradewind text-[#0d0d0d] hover:bg-tradewind cursor-pointer"
+                      disabled={!isFormValid}
+                      onClick={handleConfirmSend}
+                      data-testid="button-confirm-send"
+                    >
+                      <span className="[font-family:'DM_Sans',Helvetica] text-[13px] font-medium">Envoyer maintenant</span>
+                    </Button>
+                  ) : workflow === "blockchain" ? (
+                    <Button className="mt-2 h-11 w-full rounded-xl bg-[#6c6c6c] text-[#f8f8f8]" disabled>
+                      <span className="[font-family:'DM_Sans',Helvetica] text-[13px] font-medium">Transaction en cours sur la blockchain...</span>
+                    </Button>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="rounded-2xl border border-[#2e2e2e] bg-[#212121] p-4 text-sm text-pampas">
+                        Transaction confirmée sur la blockchain et reçue par {currentRecipientName}.
+                      </div>
+                      <Link
+                        href="/expediteur/historique"
+                        className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-tradewind text-[#0d0d0d] text-[13px] font-medium hover:bg-tradewind"
+                      >
+                        Voir l'historique
+                      </Link>
+                      <Link
+                        href="/wallet"
+                        className="inline-flex h-11 w-full items-center justify-center rounded-xl border border-[#2e2e2e] bg-transparent text-[13px] font-medium text-pampas hover:bg-[#1f1f1f]"
+                      >
+                        Aller au wallet
+                      </Link>
+                    </div>
+                  )}
                   <p className="text-center [font-family:'DM_Sans',Helvetica] text-[11px] text-flint">
                     Frais : &lt;0.2% · Objectif ODD 10 ✓
                   </p>
