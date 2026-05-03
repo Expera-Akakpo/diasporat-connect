@@ -1,103 +1,135 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { MobileLayout } from "@/components/ui/MobileLayout";
+import { useState } from "react";
+import { Loader2, CheckCircle2, AlertCircle, Smartphone } from "lucide-react";
 
-const navItems = [
-  { label: "Wallet", href: "/wallet", icon: "/figmaAssets/svg.svg", active: false },
-  { label: "Retrait", href: "/retrait", icon: "/figmaAssets/svg-2.svg", active: true },
-  { label: "Historique", href: "/historique", icon: "/figmaAssets/svg-3.svg", active: false },
-  { label: "Expéditeur", href: "/expediteur", icon: "/figmaAssets/svg-1.svg", active: false },
-] as const;
-
-const bottomNavItems = [
-  { label: "Wallet", href: "/wallet", icon: "/figmaAssets/svg.svg", active: false },
-  { label: "Retrait", href: "/retrait", icon: "/figmaAssets/svg-2.svg", active: true },
-  { label: "Historique", href: "/historique", icon: "/figmaAssets/svg-3.svg", active: false },
-  { label: "Expéditeur", href: "/expediteur", icon: "/figmaAssets/svg-1.svg", active: false },
-] as const;
+const providers = [
+  { name: "MTN MoMo", icon: "https://upload.wikimedia.org/wikipedia/commons/9/93/MTN_Logo.svg", color: "#FFCC00" },
+  { name: "Moov Money", icon: "https://upload.wikimedia.org/wikipedia/en/thumb/6/6e/Moov_Logo.svg/1200px-Moov_Logo.svg.png", color: "#0055A4" },
+  { name: "Wave", icon: "https://upload.wikimedia.org/wikipedia/commons/1/1a/Wave_Logo.svg", color: "#1E90FF" },
+];
 
 export const RetraitMobileSidebarSection = (): JSX.Element => {
+  const [amount, setAmount] = useState("");
+  const [selectedProvider, setSelectedProvider] = useState(0);
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  const handleWithdraw = async () => {
+    if (!amount || !phoneNumber) return;
+    setStatus("loading");
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setStatus("success");
+  };
+
   return (
-    <section className="relative w-full overflow-hidden border border-[#0000001a] bg-white">
-      <div className="flex w-full justify-end bg-black px-2 py-0 sm:px-4">
-        <div className="flex w-full max-w-[358px] justify-center pb-1.5">
-          <article className="flex min-h-[814px] w-full flex-col overflow-hidden rounded-[36px] border border-solid border-[#2a2a2a] bg-[radial-gradient(50%_50%_at_50%_50%,rgba(44,34,24,1)_0%,rgba(17,17,16,1)_100%)] shadow-[0px_32px_80px_#000000cc]">
-            <header className="flex h-11 items-end justify-between bg-[#0d0d0d] px-5 pb-2">
-              <div className="w-fit [font-family:'DM_Sans',Helvetica] text-[13px] font-semibold text-pampas">9:41</div>
-              <img className="shrink-0" alt="Container" src="/figmaAssets/container-1.svg" />
-            </header>
-            <div className="flex h-14 items-center justify-between border-b border-[#1f1f1f] bg-[#0d0d0d] pl-[18px] pr-[18.01px]">
-              <img className="h-[34px] w-[34px] shrink-0" alt="Logo" src="/figmaAssets/link.svg" />
-              <h2 className="[font-family:'DM_Sans',Helvetica] text-base font-medium text-pampas">Retrait</h2>
-              <div className="w-16" />
+    <MobileLayout title="Retirer des fonds" role="DESTINAIRE">
+      <div className="flex flex-col gap-4 p-4">
+        <Card className="rounded-2xl border border-[#6ec4a726] bg-aztec shadow-none">
+          <CardContent className="flex flex-col gap-1 px-4 py-4">
+            <span className="text-[10px] font-bold tracking-[0.80px] text-flint uppercase">Solde disponible</span>
+            <div className="flex items-baseline gap-2">
+              <span className="[font-family:'DM_Mono',Helvetica] text-2xl font-medium text-tradewind">131 284</span>
+              <span className="text-[10px] text-flint font-mono">XOF</span>
             </div>
-            <main className="flex-1 overflow-hidden">
-              <div className="flex h-full flex-col gap-3 overflow-y-auto p-4">
-                <Card className="rounded-2xl border border-solid border-[#6ec4a726] bg-aztec shadow-none">
-                  <CardContent className="flex flex-col gap-[3px] px-4 py-4">
-                    <p className="[font-family:'DM_Sans',Helvetica] text-[10px] font-bold tracking-[0.80px] text-tradewind-60 uppercase">Solde disponible</p>
-                    <p className="[font-family:'DM_Mono',Helvetica] text-[26px] font-medium text-tradewind">131 284 <span className="text-[14px] text-elm">XOF</span></p>
-                    <Badge className="w-fit rounded border border-[#fbbf2440] bg-[#1f1900] px-2.5 py-[3px] [font-family:'DM_Sans',Helvetica] text-[10px] font-bold tracking-[0.50px] text-[#c4a35a] hover:bg-[#1f1900]">
-                      À retirer
-                    </Badge>
-                  </CardContent>
-                </Card>
+          </CardContent>
+        </Card>
 
-                <Card className="rounded-2xl border border-solid border-[#2e2e2e] bg-[#1a1a1a] shadow-none">
-                  <CardContent className="flex flex-col gap-3 px-4 py-4">
-                    <p className="[font-family:'DM_Sans',Helvetica] text-[11px] font-semibold tracking-[0.80px] text-flint uppercase">Montant</p>
-                    <div className="flex items-center gap-2 rounded-xl border border-[#2e2e2e] bg-[#212121] px-3 py-2.5">
-                      <span className="[font-family:'DM_Mono',Helvetica] text-[10px] text-flint">XOF</span>
-                      <span className="[font-family:'DM_Mono',Helvetica] text-[20px] font-medium text-pampas">131 284</span>
-                    </div>
-                  </CardContent>
-                </Card>
+        <Card className="rounded-2xl border border-[#2e2e2e] bg-[#1a1a1a] shadow-none">
+          <CardContent className="flex flex-col gap-4 px-4 py-4">
+            <div className="flex flex-col gap-1">
+              <Label className="text-[11px] font-semibold tracking-[0.80px] text-flint uppercase ml-1">Montant à retirer</Label>
+              <div className="flex items-center gap-2 rounded-xl border border-[#2e2e2e] bg-[#212121] px-3 py-2.5">
+                <input
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="0"
+                  className="flex-1 bg-transparent [font-family:'DM_Mono',Helvetica] text-[24px] font-medium text-pampas outline-none placeholder:text-[#3a3a3a]"
+                />
+                <span className="text-[10px] text-flint bg-[#2a2a2a] px-2 py-0.5 rounded-full font-mono">XOF</span>
+              </div>
+            </div>
 
-                <Card className="rounded-2xl border border-solid border-[#2e2e2e] bg-[#1a1a1a] shadow-none">
-                  <CardContent className="flex flex-col gap-3 px-4 py-4">
-                    <p className="[font-family:'DM_Sans',Helvetica] text-[11px] font-semibold tracking-[0.80px] text-flint uppercase">Méthode</p>
-                    <div className="flex items-center gap-3 rounded-xl border border-[#6ec4a766] bg-aztec px-3 py-2.5">
-                      <span className="text-xl">📱</span>
-                      <div className="flex flex-col">
-                        <span className="[font-family:'DM_Sans',Helvetica] text-[13px] font-medium text-tradewind">MTN MoMo</span>
-                        <span className="[font-family:'DM_Sans',Helvetica] text-[11px] text-elm">Mobile Money · Instantané</span>
-                      </div>
+            <div className="flex flex-col gap-2">
+              <Label className="text-[11px] font-semibold tracking-[0.80px] text-flint uppercase ml-1">Fournisseur</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {providers.map((p, i) => (
+                  <button
+                    key={p.name}
+                    onClick={() => setSelectedProvider(i)}
+                    className={`flex flex-col items-center gap-2 rounded-xl border p-2 transition-all ${
+                      selectedProvider === i ? "border-tradewind bg-aztec" : "border-[#2e2e2e] bg-[#212121]"
+                    }`}
+                  >
+                    <div className="h-6 w-6 overflow-hidden rounded-md bg-white p-0.5">
+                      <img src={p.icon} alt={p.name} className="h-full w-full object-contain" />
                     </div>
-                  </CardContent>
-                </Card>
+                    <span className={`text-[9px] font-medium ${selectedProvider === i ? "text-tradewind" : "text-flint"}`}>
+                      {p.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
 
-                <Card className="rounded-2xl border border-solid border-[#2e2e2e] bg-[#1a1a1a] shadow-none">
-                  <CardContent className="flex flex-col gap-2 px-4 py-4">
-                    <div className="flex justify-between">
-                      <span className="[font-family:'DM_Sans',Helvetica] text-[12px] text-flint">Montant</span>
-                      <span className="[font-family:'DM_Mono',Helvetica] text-[12px] font-medium text-pampas">131 284 XOF</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="[font-family:'DM_Sans',Helvetica] text-[12px] text-flint">Frais</span>
-                      <span className="[font-family:'DM_Mono',Helvetica] text-[12px] font-medium text-tradewind">0 XOF</span>
-                    </div>
-                  </CardContent>
-                </Card>
+            <div className="flex flex-col gap-1">
+              <Label className="text-[11px] font-semibold tracking-[0.80px] text-flint uppercase ml-1">Numéro de téléphone</Label>
+              <div className="flex items-center gap-2 rounded-xl border border-[#2e2e2e] bg-[#212121] px-3 py-2.5">
+                <Smartphone className="h-4 w-4 text-flint" />
+                <input
+                  type="tel"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  placeholder="+229 00 00 00 00"
+                  className="flex-1 bg-transparent text-sm text-pampas outline-none"
+                />
+              </div>
+            </div>
 
-                <Button className="h-11 w-full rounded-xl bg-tradewind text-[#0d0d0d] hover:bg-tradewind">
-                  <span className="[font-family:'DM_Sans',Helvetica] text-[13px] font-medium">Confirmer</span>
+            {status === "idle" && (
+              <Button
+                onClick={handleWithdraw}
+                className="h-11 w-full rounded-xl bg-tradewind text-[#0d0d0d] hover:bg-tradewind"
+                disabled={!amount || !phoneNumber}
+              >
+                <span className="text-[13px] font-medium font-sans">Retirer maintenant</span>
+              </Button>
+            )}
+
+            {status === "loading" && (
+              <Button disabled className="h-11 w-full rounded-xl bg-aztec text-tradewind">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Traitement...
+              </Button>
+            )}
+
+            {status === "success" && (
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 rounded-xl bg-aztec/50 p-3 text-tradewind border border-tradewind/20">
+                  <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  <div className="flex flex-col">
+                    <span className="text-[11px] font-bold">Demande envoyée</span>
+                    <span className="text-[10px]">Fonds disponibles sous peu.</span>
+                  </div>
+                </div>
+                <Button onClick={() => window.location.reload()} variant="outline" className="w-full h-8 text-[11px] border-[#2e2e2e] text-flint">
+                  Retour au wallet
                 </Button>
               </div>
-            </main>
-            <footer className="flex h-16 items-center justify-between border-t border-[#1f1f1f] bg-[#0d0d0d] px-4 pb-1.5 pt-0">
-              {bottomNavItems.map((item) => (
-                <Link key={item.label} href={item.href} className="inline-flex min-w-0 flex-col items-center gap-[3px] rounded-xl px-3 py-1.5">
-                  <img className="h-5 w-5 shrink-0" alt={item.label} src={item.icon} />
-                  <span className={`[font-family:'DM_Sans',Helvetica] text-[10px] leading-[normal] font-medium ${item.active ? "text-tradewind" : "text-masala"}`}>
-                    {item.label}
-                  </span>
-                </Link>
-              ))}
-            </footer>
-          </article>
-        </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <p className="text-center text-[10px] text-flint px-4">
+          Le transfert vers votre compte Mobile Money est quasi-instantané après validation.
+        </p>
       </div>
-    </section>
+    </MobileLayout>
   );
 };
