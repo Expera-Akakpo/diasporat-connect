@@ -1,0 +1,229 @@
+@import url("https://fonts.googleapis.com/css?family=DM+Sans:700,400,600,500|DM+Mono:500,400");
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  /* Improved Version Colors */
+  --color-tradewind: rgba(110, 196, 167, 1);
+  --color-tradewind-10: rgba(110, 196, 167, 0.1);
+  --color-tradewind-12: rgba(110, 196, 167, 0.12);
+  --color-tradewind-15: rgba(110, 196, 167, 0.15);
+  --color-tradewind-20: rgba(110, 196, 167, 0.2);
+  --color-tradewind-25: rgba(110, 196, 167, 0.25);
+  --color-tradewind-30: rgba(110, 196, 167, 0.3);
+  --color-tradewind-35: rgba(110, 196, 167, 0.35);
+  --color-tradewind-40: rgba(110, 196, 167, 0.4);
+  --color-tradewind-45: rgba(110, 196, 167, 0.45);
+  --color-tradewind-60: rgba(110, 196, 167, 0.6);
+
+  --color-aztec: rgba(15, 36, 32, 1);
+  --color-aztec-50: rgba(15, 36, 32, 0.5);
+  --color-aztec-60: rgba(15, 36, 32, 0.6);
+  
+  --color-pampas: rgba(240, 237, 232, 1);
+  --color-flint: rgba(107, 101, 96, 1);
+  --color-elm: rgba(29, 122, 96, 1);
+  --color-apache: rgba(223, 192, 112, 1);
+  --color-bronco: rgba(168, 159, 147, 1);
+  --color-shamrock: rgba(74, 222, 128, 1);
+  --color-racing-green: rgba(13, 31, 18, 1);
+  --color-lightning-yellow: rgba(196, 163, 90, 1);
+  --color-masala: rgba(61, 58, 55, 1);
+  --color-twine: rgba(196, 163, 90, 1);
+  --color-cod-gray-88: rgba(13, 13, 13, 0.88);
+
+  /* shadcn/ui compatible theme variables */
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  /* Prototype compatible colors */
+  --color-bg-primary: #0D0D0D;
+  --color-bg-secondary: #141414;
+  --color-bg-card: #1B1818;
+  --color-bg-surface: #232323;
+
+  /* Fonts */
+  --font-display: 'Syne', sans-serif;
+  --font-mono: 'Space Mono', monospace;
+  --font-body: 'DM Sans', sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+:root {
+  /* CSS Variables for use in styles */
+  --apache: rgba(223, 192, 112, 1);
+  --aztec: rgba(15, 36, 32, 1);
+  --aztec-50: rgba(15, 36, 32, 0.5);
+  --aztec-60: rgba(15, 36, 32, 0.6);
+  --azure-radiance-30: rgba(0, 120, 255, 0.3);
+  --black: rgba(5, 5, 5, 1);
+  --black-20: rgba(0, 0, 0, 0.2);
+  --black-72: rgba(0, 0, 0, 0.72);
+  --black-75: rgba(0, 0, 0, 0.75);
+  --blue-bell: rgba(136, 136, 204, 1);
+  --blue-charcoal: rgba(0, 16, 32, 1);
+  --blue-marguerite-20: rgba(100, 100, 200, 0.2);
+  --blue-marguerite-30: rgba(100, 100, 200, 0.3);
+  --bronco: rgba(168, 159, 147, 1);
+  --claireground: rgba(44, 36, 36, 0.38);
+  --cod-gray: rgba(20, 20, 20, 1);
+  --cod-gray-88: rgba(13, 13, 13, 0.88);
+  --cod-gray-92: rgba(13, 13, 13, 0.92);
+  --cold-purple: rgba(153, 153, 221, 1);
+  --cutty-sark: rgba(74, 107, 96, 1);
+  --dallas: rgba(122, 95, 38, 1);
+  --dodger-blue: rgba(68, 136, 255, 1);
+  --elm: rgba(29, 122, 96, 1);
+  --flint: rgba(107, 101, 96, 1);
+  --gold: rgba(255, 215, 0, 1);
+  --jade: rgba(0, 204, 106, 1);
+  --jade-30: rgba(0, 180, 100, 0.3);
+  --lightning-yellow: rgba(196, 163, 90, 1);
+  --lightning-yellow-25: rgba(251, 191, 36, 0.25);
+  --masala: rgba(61, 58, 55, 1);
+  --mine-shaft: rgba(42, 42, 42, 1);
+  --mirage: rgba(26, 26, 42, 1);
+  --nero: rgba(26, 21, 0, 1);
+  --ocean-green: rgba(62, 160, 130, 1);
+  --pale-sky: rgba(107, 114, 128, 1);
+  --pampas: rgba(240, 237, 232, 1);
+  --polo-blue: rgba(139, 155, 202, 1);
+  --racing-green: rgba(13, 31, 18, 1);
+  --shamrock: rgba(74, 222, 128, 1);
+  --shamrock-25: rgba(74, 222, 128, 0.25);
+  --supernova-30: rgba(255, 200, 0, 0.3);
+  --swamp: rgba(0, 26, 20, 1);
+  --sycamore: rgba(163, 131, 60, 1);
+  --tradewind: rgba(110, 196, 167, 1);
+  --tradewind-10: rgba(110, 196, 167, 0.1);
+  --tradewind-12: rgba(110, 196, 167, 0.12);
+  --tradewind-15: rgba(110, 196, 167, 0.15);
+  --tradewind-20: rgba(110, 196, 167, 0.2);
+  --tradewind-25: rgba(110, 196, 167, 0.25);
+  --tradewind-30: rgba(110, 196, 167, 0.3);
+  --tradewind-35: rgba(110, 196, 167, 0.35);
+  --tradewind-40: rgba(110, 196, 167, 0.4);
+  --tradewind-45: rgba(110, 196, 167, 0.45);
+  --tradewind-60: rgba(110, 196, 167, 0.6);
+  --twine: rgba(196, 163, 90, 1);
+  --twine-12: rgba(196, 163, 90, 0.12);
+  --twine-15: rgba(196, 163, 90, 0.15);
+  --twine-20: rgba(196, 163, 90, 0.2);
+  --twine-25: rgba(251, 191, 36, 0.25);
+  --twine-30: rgba(196, 163, 90, 0.3);
+  --twine-35: rgba(196, 163, 90, 0.35);
+  --twine-40: rgba(196, 163, 90, 0.4);
+  --waikawa-gray: rgba(91, 106, 154, 1);
+  --white-02: rgba(255, 255, 255, 0);
+  --white-5: rgba(255, 255, 255, 0.05);
+  --white-cod-gray: rgba(255, 255, 255, 1);
+  --zeus: rgba(42, 34, 24, 1);
+
+  --background: 0 0% 100%;
+  --foreground: 222.2 47.4% 11.2%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 47.4% 11.2%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --card: transparent;
+  --card-foreground: 222.2 47.4% 11.2%;
+  --primary: 222.2 47.4% 11.2%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+  --destructive: 0 100% 50%;
+  --destructive-foreground: 210 40% 98%;
+  --ring: 215 20.2% 65.1%;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 224 71% 4%;
+  --foreground: 213 31% 91%;
+  --muted: 223 47% 11%;
+  --muted-foreground: 215.4 16.3% 56.9%;
+  --accent: 216 34% 17%;
+  --accent-foreground: 210 40% 98%;
+  --popover: 224 71% 4%;
+  --popover-foreground: 215 20.2% 65.1%;
+  --border: 216 34% 17%;
+  --input: 216 34% 17%;
+  --card: transparent;
+  --card-foreground: 213 31% 91%;
+  --primary: 210 40% 98%;
+  --primary-foreground: 222.2 47.4% 1.2%;
+  --secondary: 222.2 47.4% 11.2%;
+  --secondary-foreground: 210 40% 98%;
+  --destructive: 0 63% 31%;
+  --destructive-foreground: 210 40% 98%;
+  --ring: 216 34% 17%;
+  --radius: 0.5rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(1turn); }
+}
+
+@keyframes image-glow {
+  0% { opacity: 0; animation-timing-function: cubic-bezier(0.74, 0.25, 0.76, 1); }
+  10% { opacity: 0.7; animation-timing-function: cubic-bezier(0.12, 0.01, 0.08, 0.99); }
+  to { opacity: 0.4; }
+}
+
+@keyframes fade-in {
+  0% { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes fade-up {
+  0% { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes shimmer {
+  0%, 90%, to { background-position: calc(-100% - var(--shimmer-width)) 0; }
+  30%, 60% { background-position: calc(100% + var(--shimmer-width)) 0; }
+}
+
+@keyframes marquee {
+  0% { transform: translate(0); }
+  to { transform: translateX(calc(-100% - var(--gap))); }
+}
+
+@keyframes marquee-vertical {
+  0% { transform: translateY(0); }
+  to { transform: translateY(calc(-100% - var(--gap))); }
+}
