@@ -39,4 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+<<<<<<< HEAD
 .backup*
+=======
+
+# Local Netlify folder
+.netlify
+>>>>>>> 2c7623bae8628ff4959541a881e8d62b2e0ecf93

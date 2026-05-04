@@ -6,7 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { UserMenu } from "@/components/UserMenu";
+import { useTransfer } from "@/hooks/useTransfer";
+import { Loader2, CheckCircle2, AlertCircle, Info } from "lucide-react";
 import { useTransaction } from "@/contexts/TransactionContext";
+
 
 const navItems = [
   { label: "Envoyer", href: "/expediteur", active: true },
@@ -20,40 +23,43 @@ const footerLinks = [
 ];
 
 const recipients = [
-  { avatarSrc: "/figmaAssets/background-border-6.svg", name: "Amadou Mbaye", phone: "+221 77 000 00 00", country: "🇸🇳 Sénégal" },
-  { avatarSrc: "/figmaAssets/background-border-1.svg", name: "Fatou Diallo", phone: "+225 07 000 00 00", country: "🇨🇮 Côte d'Ivoire" },
+  { avatarSrc: "/figmaAssets/background-border-6.svg", name: "Amadou Mbaye", phone: "+221 77 000 00 00", country: "🇸🇳 Sénégal", wallet: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e" },
+  { avatarSrc: "/figmaAssets/background-border-1.svg", name: "Fatou Diallo", phone: "+225 07 000 00 00", country: "🇨🇮 Côte d'Ivoire", wallet: "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC" },
 ];
 
 export const ExpéditeurSection = (): JSX.Element => {
   const { sendTransfer } = useTransaction();
   const [amount, setAmount] = useState("200");
   const [selectedRecipient, setSelectedRecipient] = useState<number | "new">(0);
-  const [manualRecipient, setManualRecipient] = useState({ name: "", phone: "", country: "🇧🇯 Bénin" });
-  const [workflow, setWorkflow] = useState<"compose" | "blockchain" | "success">("compose");
-  const [isSending, setIsSending] = useState(false);
-  const [lastTransferId, setLastTransferId] = useState<string | null>(null);
+  const [manualRecipient, setManualRecipient] = useState({ name: "", phone: "", country: "🇧🇯 Bénin", wallet: "" });
+
+  const {
+    isSimulationMode,
+    status,
+    txHash,
+    error,
+    account,
+    connectWallet,
+    sendMoney,
+    toggleSimulationMode
+  } = useTransfer();
 
   const amountNumber = Number(amount.toString().replace(/\s/g, "").replace(",", "."));
   const xofAmount = amountNumber > 0 ? Math.round(amountNumber * 655).toLocaleString("fr-FR") : "—";
   const fees = amountNumber > 0 ? (amountNumber * 0.002).toFixed(2) : "0.00";
 
   const currentRecipientName = selectedRecipient === "new" ? manualRecipient.name || "Nouveau destinataire" : recipients[selectedRecipient].name;
-  const currentRecipientCountry = selectedRecipient === "new" ? manualRecipient.country : recipients[selectedRecipient].country;
-  const currentRecipientPhone = selectedRecipient === "new" ? manualRecipient.phone : recipients[selectedRecipient].phone;
+  const currentRecipientWallet = selectedRecipient === "new" ? manualRecipient.wallet : recipients[selectedRecipient].wallet;
 
-  const isFormValid = amountNumber > 0 && Boolean(currentRecipientName) && Boolean(currentRecipientPhone);
-
-  const workflowStatus = workflow === "success" ? "Confirmé" : workflow === "blockchain" ? "En cours" : "Prêt";
-
-  useEffect(() => {
-    if (workflow !== "blockchain" || isSending) return;
-
-    const timer = setTimeout(() => {
-      setWorkflow("success");
-    }, 1800);
-
-    return () => clearTimeout(timer);
-  }, [workflow, isSending]);
+  const handleSend = async () => {
+    if (!amount || parseFloat(amount) <= 0) return;
+    
+    // Convert EUR to ETH for simulation/blockchain (using a fixed mock rate for demo)
+    // 1 ETH ≈ 2400 EUR => amount / 2400
+    const ethAmount = (parseFloat(amount) / 2400).toFixed(6);
+    
+    await sendMoney(currentRecipientWallet || "0x0000000000000000000000000000000000000000", ethAmount);
+  };
 
   return (
     <section className="relative w-full overflow-hidden bg-cod-gray-88 min-h-screen">
@@ -85,6 +91,21 @@ export const ExpéditeurSection = (): JSX.Element => {
               ))}
             </nav>
             <div className="flex items-center gap-2.5">
+              <div className="flex flex-col items-end mr-2">
+                {account ? (
+                  <span className="text-[10px] text-flint font-mono">{account.substring(0, 6)}...{account.substring(account.length-4)}</span>
+                ) : (
+                  <Button onClick={connectWallet} variant="ghost" className="h-7 text-[11px] text-tradewind">
+                    Connecter Wallet
+                  </Button>
+                )}
+                <button 
+                  onClick={toggleSimulationMode}
+                  className="text-[9px] text-tradewind-60 underline hover:text-tradewind"
+                >
+                  {isSimulationMode ? "Mode Simulation [ON]" : "Passer en Simulation"}
+                </button>
+              </div>
               <Button asChild variant="outline" className="h-auto rounded-full border-[#2e2e2e] bg-transparent px-4 py-[7px] hover:bg-transparent">
                 <Link href="/wallet" className="[font-family:'DM_Sans',Helvetica] text-xs font-medium text-tradewind">
                   Interface Destinataire →
@@ -105,33 +126,92 @@ export const ExpéditeurSection = (): JSX.Element => {
             </p>
           </div>
 
-          {workflow === "compose" && (
-            <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
-              <div className="flex flex-col gap-5">
-                <Card className="rounded-2xl border border-[#6ec4a726] bg-aztec shadow-none">
-                  <CardContent className="flex flex-col gap-4 px-6 py-5">
-                    <div className="flex flex-col gap-2">
-                      <Label htmlFor="amount" className="[font-family:'DM_Sans',Helvetica] text-sm font-medium text-pampas">
-                        Montant à envoyer (€)
-                      </Label>
-                      <div className="relative">
+          <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
+            <div className="flex flex-col gap-5">
+              {isSimulationMode && (
+                <div className="flex items-center gap-2 rounded-xl bg-aztec/30 border border-tradewind/20 px-4 py-3 text-tradewind text-xs">
+                  <Info className="h-4 w-4" />
+                  <span>Mode Démo actif : Les transactions sont simulées sans frais réels.</span>
+                </div>
+              )}
+
+              <Card className="rounded-2xl border border-[#2e2e2e] bg-[#1a1a1a] shadow-none">
+                <CardContent className="flex flex-col gap-5 px-6 py-5">
+                  <div className="[font-family:'DM_Sans',Helvetica] text-[13px] font-semibold tracking-[0.80px] text-flint uppercase">
+                    Montant à envoyer
+                  </div>
+                  <div className="flex items-center gap-3 rounded-xl border border-[#2e2e2e] bg-[#212121] px-4 py-3">
+                    <span className="[font-family:'DM_Sans',Helvetica] text-[18px] text-flint">€</span>
+                    <input
+                      type="number"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      placeholder="0.00"
+                      className="flex-1 bg-transparent [font-family:'DM_Mono',Helvetica] text-[32px] font-medium text-pampas outline-none placeholder:text-[#3a3a3a]"
+                      data-testid="input-send-amount"
+                    />
+                    <span className="shrink-0 rounded-full border border-[#2e2e2e] px-3 py-1 [font-family:'DM_Sans',Helvetica] text-[11px] text-flint">EUR</span>
+                  </div>
+                  <div className="flex items-center justify-between rounded-xl border border-[#1f1f1f] bg-[#111] px-4 py-3">
+                    <span className="[font-family:'DM_Sans',Helvetica] text-[12px] text-flint">Le destinataire reçoit</span>
+                    <span className="[font-family:'DM_Mono',Helvetica] text-[18px] font-medium text-tradewind">{xofAmount} XOF</span>
+                  </div>
+                  <div className="flex gap-2">
+                    {["50", "100", "200", "500"].map((v) => (
+                      <Button
+                        key={v}
+                        type="button"
+                        variant="outline"
+                        onClick={() => setAmount(v)}
+                        className="h-auto rounded-full border-[#2e2e2e] bg-transparent px-3.5 py-1.5 [font-family:'DM_Sans',Helvetica] text-xs text-flint hover:bg-[#2a2a2a]"
+                        data-testid={`button-preset-eur-${v}`}
+                      >
+                        €{v}
+                      </Button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-2xl border border-[#2e2e2e] bg-[#1a1a1a] shadow-none">
+                <CardContent className="flex flex-col gap-4 px-6 py-5">
+                  <div className="flex items-center justify-between">
+                    <div className="[font-family:'DM_Sans',Helvetica] text-[13px] font-semibold tracking-[0.80px] text-flint uppercase">
+                      Destinataire
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => setSelectedRecipient(selectedRecipient === "new" ? 0 : "new")}
+                      className="h-7 text-[11px] text-tradewind hover:bg-aztec"
+                    >
+                      {selectedRecipient === "new" ? "← Mes contacts" : "+ Nouveau"}
+                    </Button>
+                  </div>
+
+                  {selectedRecipient === "new" ? (
+                    <div className="flex flex-col gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="flex flex-col gap-1.5">
+                        <Label className="text-[11px] text-flint px-1">Nom complet</Label>
                         <Input
-                          id="amount"
-                          type="number"
-                          value={amount}
-                          onChange={(e) => setAmount(e.target.value)}
-                          className="h-12 rounded-xl border-[#2e2e2e] bg-[#1a1a1a] pr-16 text-right [font-family:'DM_Mono',Helvetica] text-xl font-medium text-pampas placeholder:text-flint focus:border-tradewind focus:ring-tradewind"
-                          placeholder="0.00"
+                          placeholder="Ex: jean miabehackathon"
+                          value={manualRecipient.name}
+                          onChange={(e) => setManualRecipient({ ...manualRecipient, name: e.target.value })}
+                          className="h-10 rounded-xl border-[#2e2e2e] bg-[#212121] text-pampas focus-visible:ring-tradewind"
                         />
-                        <span className="absolute right-4 top-1/2 -translate-y-1/2 [font-family:'DM_Sans',Helvetica] text-sm font-medium text-flint">
-                          €
-                        </span>
                       </div>
-                      <div className="[font-family:'DM_Sans',Helvetica] text-xs text-flint">
-                        ≈ {xofAmount} XOF au taux de 655 XOF/€
+                      <div className="flex flex-col gap-1.5">
+                        <Label className="text-[11px] text-flint px-1">Adresse Wallet (ETH)</Label>
+                        <Input
+                          placeholder="0x..."
+                          value={manualRecipient.wallet}
+                          onChange={(e) => setManualRecipient({ ...manualRecipient, wallet: e.target.value })}
+                          className="h-10 rounded-xl border-[#2e2e2e] bg-[#212121] text-pampas focus-visible:ring-tradewind"
+                        />
                       </div>
                     </div>
-
+                    ) : (
+                      
                     <div className="flex flex-col gap-2">
                       <Label className="[font-family:'DM_Sans',Helvetica] text-sm font-medium text-pampas">
                         Destinataire
@@ -180,77 +260,63 @@ export const ExpéditeurSection = (): JSX.Element => {
                           </div>
                         </div>
                       </div>
-
-                      {selectedRecipient === "new" && (
-                        <div className="mt-3 grid gap-3 rounded-xl border border-[#2e2e2e] bg-[#1a1a1a] p-4">
-                          <div className="grid gap-2">
-                            <Label htmlFor="name" className="[font-family:'DM_Sans',Helvetica] text-xs font-medium text-flint uppercase tracking-wide">
-                              Nom complet
-                            </Label>
-                            <Input
-                              id="name"
-                              value={manualRecipient.name}
-                              onChange={(e) => setManualRecipient(prev => ({ ...prev, name: e.target.value }))}
-                              className="h-10 rounded-lg border-[#2e2e2e] bg-transparent [font-family:'DM_Sans',Helvetica] text-sm text-pampas placeholder:text-flint focus:border-tradewind"
-                              placeholder="Ex: Jean Dupont"
-                            />
-                          </div>
-                          <div className="grid gap-2">
-                            <Label htmlFor="phone" className="[font-family:'DM_Sans',Helvetica] text-xs font-medium text-flint uppercase tracking-wide">
-                              Numéro de téléphone
-                            </Label>
-                            <Input
-                              id="phone"
-                              value={manualRecipient.phone}
-                              onChange={(e) => setManualRecipient(prev => ({ ...prev, phone: e.target.value }))}
-                              className="h-10 rounded-lg border-[#2e2e2e] bg-transparent [font-family:'DM_Sans',Helvetica] text-sm text-pampas placeholder:text-flint focus:border-tradewind"
-                              placeholder="Ex: +225 07 00 00 00 00"
-                            />
-                          </div>
-                        </div>
-                      )}
                     </div>
+                    )}
+                  <div className="flex items-center justify-between">
+                    <span className="[font-family:'DM_Sans',Helvetica] text-[13px] font-semibold text-pampas">Reçu</span>
+                    <span className="[font-family:'DM_Mono',Helvetica] text-[18px] font-medium text-tradewind">{xofAmount} XOF</span>
+                  </div>
 
-                    <div className="flex flex-col gap-3 pt-2">
-                      <div className="flex items-center justify-between [font-family:'DM_Sans',Helvetica] text-sm">
-                        <span className="text-flint">Frais de transaction</span>
-                        <span className="text-pampas">{fees} €</span>
-                      </div>
-                      <div className="flex items-center justify-between [font-family:'DM_Sans',Helvetica] text-sm">
-                        <span className="text-flint">Taux de change</span>
-                        <span className="text-pampas">655 XOF/€</span>
-                      </div>
-                      <div className="flex items-center justify-between [font-family:'DM_Sans',Helvetica] text-base font-medium">
-                        <span className="text-pampas">Total à recevoir</span>
-                        <span className="text-tradewind">{xofAmount} XOF</span>
-                      </div>
-                    </div>
-
+                  {status === "idle" && (
                     <Button
-                      onClick={async () => {
-                        if (!isFormValid || isSending) return;
-                        setIsSending(true);
-                        try {
-                          await sendTransfer({
-                            recipient: currentRecipientName,
-                            country: currentRecipientCountry,
-                            amountEUR: amountNumber,
-                            amountXOF: amountNumber * 655,
-                            feesEUR: amountNumber * 0.002
-                          });
-                          setLastTransferId(`TXN-${Date.now()}`);
-                          setWorkflow("blockchain");
-                        } finally {
-                          setIsSending(false);
-                        }
-                      }}
-                      disabled={!isFormValid || isSending}
-                      className="h-12 w-full rounded-xl bg-tradewind text-[#0d0d0d] hover:bg-tradewind disabled:opacity-50 [font-family:'DM_Sans',Helvetica] text-sm font-medium"
+                      onClick={handleSend}
+                      className="mt-2 h-11 w-full rounded-xl bg-tradewind text-[#0d0d0d] hover:bg-tradewind"
+                      disabled={!amount || parseFloat(amount) <= 0}
+                      data-testid="button-confirm-send"
                     >
-                      {isSending ? "Envoi en cours..." : `Envoyer ${amount} €`}
+                      <span className="[font-family:'DM_Sans',Helvetica] text-[13px] font-medium">Envoyer maintenant</span>
                     </Button>
-                  </CardContent>
-                </Card>
+                  )}
+
+                  {(status === "loading" || status === "connecting") && (
+                    <Button disabled className="mt-2 h-11 w-full rounded-xl bg-aztec text-tradewind">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {status === "connecting" ? "Connexion Wallet..." : "Transfert en cours..."}
+                    </Button>
+                  )}
+
+                  {status === "success" && (
+                    <div className="mt-2 flex flex-col gap-2">
+                      <div className="flex items-center gap-2 rounded-xl bg-aztec/50 p-3 text-tradewind border border-tradewind/20">
+                        <CheckCircle2 className="h-5 w-5 shrink-0" />
+                        <div className="flex flex-col overflow-hidden">
+                          <span className="text-xs font-bold">Transfert Confirmé !</span>
+                          <span className="text-[10px] font-mono truncate">{txHash}</span>
+                        </div>
+                      </div>
+                      <Button onClick={() => window.location.reload()} variant="outline" className="w-full border-[#2e2e2e] text-flint">
+                        Nouvel envoi
+                      </Button>
+                    </div>
+                  )}
+
+                  {status === "error" && (
+                    <div className="mt-2 flex flex-col gap-2">
+                      <div className="flex items-center gap-2 rounded-xl bg-red-900/20 p-3 text-red-400 border border-red-900/40">
+                        <AlertCircle className="h-5 w-5 shrink-0" />
+                        <span className="text-xs">{error || "Une erreur est survenue"}</span>
+                      </div>
+                      <Button onClick={handleSend} className="w-full bg-tradewind text-[#0d0d0d]">
+                        Réessayer
+                      </Button>
+                    </div>
+                  )}
+
+                  <p className="text-center [font-family:'DM_Sans',Helvetica] text-[11px] text-flint">
+                    Frais : &lt;0.2% · Objectif ODD 10 ✓
+                  </p>
+                </CardContent>
+              </Card>
 
                 <Card className="rounded-2xl border border-[#6ec4a726] bg-aztec shadow-none">
                   <CardContent className="flex flex-col gap-[3px] px-5 py-4">

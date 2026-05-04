@@ -4,6 +4,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
 import { UserMenu } from "@/components/UserMenu";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { MobileLayout } from "@/components/ui/MobileLayout";
+import { Calendar, User, ArrowUpRight } from "lucide-react";
 
 const navItems = [
   { label: "Envoyer", href: "/expediteur", active: false },
@@ -44,6 +47,102 @@ const transfers = [
 ];
 
 export const ExpéditeurHistorySection = (): JSX.Element => {
+  const isMobile = useIsMobile();
+
+  const content = (
+    <div className={`${isMobile ? "p-4" : "mx-auto max-w-[1160px] px-6 pb-20 pt-12 xl:px-10"} flex flex-col gap-6`}>
+      <div className="flex flex-col gap-1">
+        <h1 className={`${isMobile ? "text-xl" : "text-[28px]"} [font-family:'DM_Sans',Helvetica] font-medium tracking-[-0.56px] leading-tight text-pampas`}>
+          Historique des transferts
+        </h1>
+        <p className="[font-family:'DM_Sans',Helvetica] text-sm font-normal leading-[21px] text-flint">
+          Retrouvez tous vos envois d'argent sécurisés par la blockchain.
+        </p>
+      </div>
+
+      {isMobile ? (
+        <div className="flex flex-col gap-3">
+          {transfers.map((t, i) => (
+            <Card key={i} className="rounded-2xl border border-[#2e2e2e] bg-[#1a1a1a] shadow-none">
+              <CardContent className="flex flex-col gap-3 p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="h-8 w-8 rounded-full bg-aztec flex items-center justify-center">
+                      <User className="h-4 w-4 text-tradewind" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[13px] font-medium text-pampas">{t.recipient}</span>
+                      <span className="text-[10px] text-flint">{t.country}</span>
+                    </div>
+                  </div>
+                  <Badge className={`rounded-full px-2 py-0 text-[9px] font-bold ${t.statusClass}`}>
+                    {t.status}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between border-t border-[#1f1f1f] pt-3">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-flint uppercase tracking-wider">Envoyé</span>
+                    <span className="text-[14px] font-mono text-pampas font-medium">{t.amount}</span>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <span className="text-[10px] text-flint uppercase tracking-wider">Reçu (XOF)</span>
+                    <span className="text-[14px] font-mono text-tradewind font-medium">{t.received}</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between text-[10px] text-flint bg-[#111] rounded-lg px-3 py-1.5">
+                  <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {t.date}</span>
+                  <span>Frais: {t.fees}</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Card className="rounded-2xl border border-[#2e2e2e] bg-[#1a1a1a] shadow-none overflow-hidden">
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader className="bg-[#111]">
+                <TableRow className="border-[#1f1f1f] hover:bg-transparent">
+                  <TableHead className="text-flint font-semibold [font-family:'DM_Sans',Helvetica] text-[10px] tracking-[0.8px] uppercase">Destinataire</TableHead>
+                  <TableHead className="text-flint font-semibold [font-family:'DM_Sans',Helvetica] text-[10px] tracking-[0.8px] uppercase">Date</TableHead>
+                  <TableHead className="text-flint font-semibold [font-family:'DM_Sans',Helvetica] text-[10px] tracking-[0.8px] uppercase">Montant</TableHead>
+                  <TableHead className="text-flint font-semibold [font-family:'DM_Sans',Helvetica] text-[10px] tracking-[0.8px] uppercase">Reçu</TableHead>
+                  <TableHead className="text-flint font-semibold [font-family:'DM_Sans',Helvetica] text-[10px] tracking-[0.8px] uppercase">Frais</TableHead>
+                  <TableHead className="text-right text-flint font-semibold [font-family:'DM_Sans',Helvetica] text-[10px] tracking-[0.8px] uppercase">Statut</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {transfers.map((t, i) => (
+                  <TableRow key={i} className="border-[#1f1f1f] hover:bg-[#222]">
+                    <TableCell className="py-4">
+                      <div className="flex flex-col">
+                        <span className="text-pampas font-medium [font-family:'DM_Sans',Helvetica] text-[13px]">{t.recipient}</span>
+                        <span className="text-flint [font-family:'DM_Sans',Helvetica] text-[11px]">{t.country}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-flint [font-family:'DM_Sans',Helvetica] text-[13px]">{t.date}</TableCell>
+                    <TableCell className="text-pampas font-medium [font-family:'DM_Mono',Helvetica] text-[13px]">{t.amount}</TableCell>
+                    <TableCell className="text-tradewind font-medium [font-family:'DM_Mono',Helvetica] text-[13px]">{t.received}</TableCell>
+                    <TableCell className="text-flint [font-family:'DM_Mono',Helvetica] text-[11px]">{t.fees}</TableCell>
+                    <TableCell className="text-right">
+                      <Badge className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold [font-family:'DM_Sans',Helvetica] ${t.statusClass}`}>
+                        {t.status}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+
+  if (isMobile) {
+    return <MobileLayout title="Historique" role="EXPÉDITEUR">{content}</MobileLayout>;
+  }
+
   return (
     <section className="relative w-full overflow-hidden rounded-sm border border-[#0000001a] bg-white">
       <div className="min-h-[953px] w-full border border-black bg-[linear-gradient(180deg,rgba(9,20,18,1)_0%,rgba(10,21,16,1)_100%)]">
@@ -78,55 +177,7 @@ export const ExpéditeurHistorySection = (): JSX.Element => {
             </div>
           </div>
         </header>
-
-        <div className="mx-auto flex w-full max-w-[1160px] flex-col gap-6 px-6 pb-20 pt-12 xl:px-10">
-          <div className="flex flex-col gap-1">
-            <h1 className="[font-family:'DM_Sans',Helvetica] text-[28px] font-medium tracking-[-0.56px] leading-[42px] text-pampas">
-              Historique des transferts
-            </h1>
-            <p className="[font-family:'DM_Sans',Helvetica] text-sm font-normal leading-[21px] text-flint">
-              Retrouvez tous vos envois d'argent sécurisés par la blockchain.
-            </p>
-          </div>
-
-          <Card className="rounded-2xl border border-[#2e2e2e] bg-[#1a1a1a] shadow-none overflow-hidden">
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader className="bg-[#111]">
-                  <TableRow className="border-[#1f1f1f] hover:bg-transparent">
-                    <TableHead className="text-flint font-semibold [font-family:'DM_Sans',Helvetica] text-[10px] tracking-[0.8px] uppercase">Destinataire</TableHead>
-                    <TableHead className="text-flint font-semibold [font-family:'DM_Sans',Helvetica] text-[10px] tracking-[0.8px] uppercase">Date</TableHead>
-                    <TableHead className="text-flint font-semibold [font-family:'DM_Sans',Helvetica] text-[10px] tracking-[0.8px] uppercase">Montant</TableHead>
-                    <TableHead className="text-flint font-semibold [font-family:'DM_Sans',Helvetica] text-[10px] tracking-[0.8px] uppercase">Reçu</TableHead>
-                    <TableHead className="text-flint font-semibold [font-family:'DM_Sans',Helvetica] text-[10px] tracking-[0.8px] uppercase">Frais</TableHead>
-                    <TableHead className="text-right text-flint font-semibold [font-family:'DM_Sans',Helvetica] text-[10px] tracking-[0.8px] uppercase">Statut</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {transfers.map((t, i) => (
-                    <TableRow key={i} className="border-[#1f1f1f] hover:bg-[#222]">
-                      <TableCell className="py-4">
-                        <div className="flex flex-col">
-                          <span className="text-pampas font-medium [font-family:'DM_Sans',Helvetica] text-[13px]">{t.recipient}</span>
-                          <span className="text-flint [font-family:'DM_Sans',Helvetica] text-[11px]">{t.country}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-flint [font-family:'DM_Sans',Helvetica] text-[13px]">{t.date}</TableCell>
-                      <TableCell className="text-pampas font-medium [font-family:'DM_Mono',Helvetica] text-[13px]">{t.amount}</TableCell>
-                      <TableCell className="text-tradewind font-medium [font-family:'DM_Mono',Helvetica] text-[13px]">{t.received}</TableCell>
-                      <TableCell className="text-flint [font-family:'DM_Mono',Helvetica] text-[11px]">{t.fees}</TableCell>
-                      <TableCell className="text-right">
-                        <Badge className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold [font-family:'DM_Sans',Helvetica] ${t.statusClass}`}>
-                          {t.status}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </div>
+        {content}
       </div>
     </section>
   );
